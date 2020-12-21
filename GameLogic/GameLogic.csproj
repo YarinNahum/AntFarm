@@ -45,17 +45,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tile\Tiles.csproj">
-      <Project>{f6a6cff8-740c-4aab-bee2-03899dee9177}</Project>
-      <Name>Tiles</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Ant\Ant.csproj">
-      <Project>{95c908ec-86e1-4e6a-b57a-f83b25931365}</Project>
-      <Name>Ant</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Food\Food.csproj">
-      <Project>{9e91ea6e-ca28-405c-b852-1f44c82ec54c}</Project>
-      <Name>Food</Name>
+    <ProjectReference Include="..\GameBoard\MyBoard.csproj">
+      <Project>{8b5a225e-d326-4b98-9e4c-24fce482c898}</Project>
+      <Name>MyBoard</Name>
     </ProjectReference>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>

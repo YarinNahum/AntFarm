@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
-using Utils;
 using Controller;
 
 namespace AntFarm
@@ -14,7 +13,7 @@ namespace AntFarm
     {
         static void Main(string[] args)
         {
-            GameController gameController = new GameController(new Info());
+            GameController gameController = new GameController();
             gameController.StartGame();
         }
 

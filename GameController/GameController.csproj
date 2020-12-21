@@ -46,13 +46,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameBoard\GameLogic.csproj">
-      <Project>{dd371731-2cba-4775-b40b-bfba54e56719}</Project>
-      <Name>GameLogic</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Utils\Utils.csproj">
-      <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>
-      <Name>Utils</Name>
+    <ProjectReference Include="..\MyController\MyGameLogic.csproj">
+      <Project>{cfda06f3-b60e-4f00-8864-225bd3205004}</Project>
+      <Name>MyGameLogic</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

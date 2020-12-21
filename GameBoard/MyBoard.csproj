@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DD6D975B-6FB4-486E-A7F9-F59429C12E1D}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>AntFarm</RootNamespace>
-    <AssemblyName>AntFarm</AssemblyName>
+    <ProjectGuid>{8B5A225E-D326-4B98-9E4C-24FCE482C898}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GameBoard</RootNamespace>
+    <AssemblyName>GameBoard</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,7 +32,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -44,16 +41,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AntFarm.cs" />
+    <Compile Include="Board.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="GameController\GameController.csproj">
-      <Project>{1e752fee-6dd7-45b0-9f99-9f3797b11d6d}</Project>
-      <Name>GameController</Name>
+    <ProjectReference Include="..\Ant\Ant.csproj">
+      <Project>{95c908ec-86e1-4e6a-b57a-f83b25931365}</Project>
+      <Name>Ant</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Food\Food.csproj">
+      <Project>{9e91ea6e-ca28-405c-b852-1f44c82ec54c}</Project>
+      <Name>Food</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+      <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
+      <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tile\Tiles.csproj">
+      <Project>{f6a6cff8-740c-4aab-bee2-03899dee9177}</Project>
+      <Name>Tiles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>
+      <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

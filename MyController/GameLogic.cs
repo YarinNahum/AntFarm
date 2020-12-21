@@ -9,7 +9,7 @@ using Utils;
 using Interfaces;
 using MyBoard;
 
-namespace Logic
+namespace MyGameLogic
 {
     public class GameLogic
     {
@@ -29,7 +29,7 @@ namespace Logic
             int count = info.NumberOfObjects;
             if (count > info.Length * info.Hight)
                 throw new ArgumentException(String.Format("The number of objects to create {0} is bigger than the size of the board {1}", count, info.Length * info.Hight));
-            board.GenerateInitialObjects(count);
+            nonDeadObjects = board.GenerateInitialObjects(count);
         }
 
         public void WakeUp()
@@ -137,7 +137,7 @@ namespace Logic
         {
             Console.WriteLine("Object number {0} is looking for a fight!", obj.Id);
             var dynamicObjects = board.GetNearObjects(obj);
-  
+
             if (dynamicObjects.Count == 0)
                 return;
             int index = MyRandom.Next(0, dynamicObjects.Count);

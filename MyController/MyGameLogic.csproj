@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8B5A225E-D326-4B98-9E4C-24FCE482C898}</ProjectGuid>
+    <ProjectGuid>{CFDA06F3-B60E-4F00-8864-225BD3205004}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GameBoard</RootNamespace>
-    <AssemblyName>GameBoard</AssemblyName>
+    <RootNamespace>MyController</RootNamespace>
+    <AssemblyName>MyController</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -41,13 +41,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board.cs" />
+    <Compile Include="GameLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tile\Tiles.csproj">
-      <Project>{f6a6cff8-740c-4aab-bee2-03899dee9177}</Project>
-      <Name>Tiles</Name>
+    <ProjectReference Include="..\GameBoard\MyBoard.csproj">
+      <Project>{8b5a225e-d326-4b98-9e4c-24fce482c898}</Project>
+      <Name>MyBoard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+      <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
+      <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>
+      <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

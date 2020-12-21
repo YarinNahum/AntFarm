@@ -9,8 +9,8 @@ namespace Utils
 {
     public class Info
     {
-
-        public Info()
+        private static Info info;
+        private Info()
         {
             try
             {
@@ -49,6 +49,14 @@ namespace Utils
         public int ObjectSleepDaysLow { get; }
         public int ObjectSleepDaysHigh { get; }
         public int ID { get; set; }
+
+        public static Info Instance
+        { get
+            {
+                if (info == null)
+                    info = new Info();
+                return info;
+            } }
 
     }
 }
