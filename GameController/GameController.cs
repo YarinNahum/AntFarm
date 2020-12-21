@@ -4,23 +4,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utils;
-using Board;
+using Logic;
+using System.Configuration;
 
 namespace Controller
 {
     public class GameController
     {
-        private Info Info { get; set; }
+        private int maxNumberOfDays;
+        private GameLogic gameLogic;
         public GameController(Info info)
         {
-            Info = info;
+            maxNumberOfDays = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MaxNumberOfDays"));
+            gameLogic = new GameLogic(info);
         }
 
         public void StartGame()
         {
-            GameBoard gameBoard = new GameBoard(Info.NumberOfAnts, Info.Length, Info.Hight);
-            int antCount = Info.NumberOfAnts;
-
+            gameLogic.GenerateInitialObjects();
+            while (maxNumberOfDays > 0)
+            {
+                maxNumberOfDays--;
+                int dynamicObjectCount = gameLogic.GetANumberOfAliveObjects();
+                if (dynamicObjectCount == 0)
+                {
+                    Console.WriteLine("All the objects are dead.");
+                    Console.WriteLine("Press enter to close the terminal");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                gameLogic.WakeUp();
+                gameLogic.StartNewDay();
+                gameLogic.GenerateFood();
+                gameLogic.UpdateAlive();
+            }
+            Console.ReadLine();
         }
     }
 }

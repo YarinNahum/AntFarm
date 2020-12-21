@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1E752FEE-6DD7-45B0-9F99-9F3797B11D6D}</ProjectGuid>
+    <ProjectGuid>{DD371731-2CBA-4775-B40B-BFBA54E56719}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GameController</RootNamespace>
-    <AssemblyName>GameController</AssemblyName>
+    <RootNamespace>GameBoard</RootNamespace>
+    <AssemblyName>GameBoard</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -32,7 +32,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -42,13 +41,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameController.cs" />
+    <Compile Include="GameLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameBoard\GameLogic.csproj">
-      <Project>{dd371731-2cba-4775-b40b-bfba54e56719}</Project>
-      <Name>GameLogic</Name>
+    <ProjectReference Include="..\Tile\Tiles.csproj">
+      <Project>{f6a6cff8-740c-4aab-bee2-03899dee9177}</Project>
+      <Name>Tiles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ant\Ant.csproj">
+      <Project>{95c908ec-86e1-4e6a-b57a-f83b25931365}</Project>
+      <Name>Ant</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Food\Food.csproj">
+      <Project>{9e91ea6e-ca28-405c-b852-1f44c82ec54c}</Project>
+      <Name>Food</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+      <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
+      <Name>Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>

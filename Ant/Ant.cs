@@ -3,38 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Interfaces;
+using FoodStaticObject;
+using Utils;
 
 namespace AntLibrary
 {
-    public class Ant : IAnt
+    public class Ant : IDynamicObject
     {
-
         public Ant(int id, int lowStrength, int highStrength)
         {
             State = State.Alive;
-            Id = id;
+            this.Id = id;
             Age = 0;
-            SleepCount = 0;
-            Strength = lowStrength == highStrength? lowStrength : new Random().Next(lowStrength, highStrength + 1);
+            SleepCount = 1;
+            Strength = lowStrength == highStrength? lowStrength : MyRandom.Next(lowStrength, highStrength + 1);
         }
 
-        public override void CalculateSleep(int low, int high)
+        public override void Fight(IDynamicObject other)
         {
-            SleepCount = low == high? low : new Random().Next(low, high + 1);
-        }
-
-        public override string DecideAction()
-        {
-            return new Random().NextDouble() >= 0.5 ? "Move" : "Fight";
-        }
-
-        public override void Fight(IAnt other)
-        {
-            Action<IAnt, IAnt> act = (IAnt winner, IAnt loser) => {winner.Strength += 2; loser.State = State.Depressed; };
+            void act(IDynamicObject winner, IDynamicObject loser) {
+                winner.AddStrength(2); 
+                loser.SetState(State.Depressed);
+                Console.WriteLine("Object number {0} won agains object number {1}\nWinner position: {2},{3}\nLoser Position {4},{5}",
+                    winner.Id,loser.Id, winner.X,winner.Y,loser.X,loser.Y); 
+            }
             if (Strength > other.Strength)
                 act(this, other);
             else if (other.Strength > Strength)
                 act(other, this);
+        }
+
+        public override void ActOnStaticObject(IStaticObject obj)
+        {
+            if (obj.GetType().Name.Equals("Food"))
+                ActOnStaticObject((Food)obj);
+        }
+
+        private void ActOnStaticObject(Food x)
+        {
+            Console.WriteLine("Ant number {0} ate food!", Id);
+            Strength += 2;
         }
     }
 }
