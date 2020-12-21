@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using Tiles;
 using Utils;
-using AntLibrary;
-using Interfaces;
-using FoodStaticObject;
+using DynamicObjects;
+using StaticObjects;
 
 namespace MyBoard
 {
@@ -145,7 +144,7 @@ namespace MyBoard
                             obj.X = x;
                             obj.Y = y;
                             if (tileToMove.StaticObject != null)
-                                obj.ActOnStaticObject(tileToMove.StaticObject);
+                                tileToMove.StaticObject.ActOnDynamicObject(obj);
                             return true;
                         }
                         finally

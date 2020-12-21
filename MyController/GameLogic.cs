@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
 using Utils;
-using Interfaces;
+using DynamicObjects;
 using MyBoard;
 
 namespace MyGameLogic

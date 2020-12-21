@@ -8,6 +8,9 @@ using MyGameLogic;
 
 namespace Controller
 {
+    /// <summary>
+    /// The main class of the game
+    /// </summary>
     public class GameController
     {
         private int maxNumberOfDays;

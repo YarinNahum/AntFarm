@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IDynamicObject.cs" />
-    <Compile Include="IStaticObject.cs" />
+    <Compile Include="Classes\Ant.cs" />
+    <Compile Include="Classes\Food.cs" />
+    <Compile Include="Interfaces\IDynamicObject.cs" />
+    <Compile Include="Interfaces\IStaticObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

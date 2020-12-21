@@ -49,9 +49,9 @@
       <Project>{8b5a225e-d326-4b98-9e4c-24fce482c898}</Project>
       <Name>MyBoard</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+    <ProjectReference Include="..\Interfaces\Objects.csproj">
       <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
-      <Name>Interfaces</Name>
+      <Name>Objects</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>

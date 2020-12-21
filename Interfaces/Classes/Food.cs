@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Interfaces;
+using DynamicObjects;
 
-namespace FoodStaticObject
+namespace StaticObjects
 {
     public class Food : IStaticObject
     {
