@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
@@ -11,17 +9,20 @@ using MyBoard;
 
 namespace MyGameLogic
 {
-    public class GameLogic
+    public class GameLogic : IGameLogic
     {
         private readonly Info info;
         private readonly Board board;
         private List<IDynamicObject> nonDeadObjects;
+        private static long finishedTasksOfTheDay = 0;
+        private readonly Stopwatch clock;
 
         public GameLogic()
         {
             info = Info.Instance;
             board = new Board(info.Length, info.Hight);
             nonDeadObjects = new List<IDynamicObject>();
+            clock = new Stopwatch();
         }
 
         public void GenerateInitialObjects()
@@ -53,36 +54,19 @@ namespace MyGameLogic
 
         public void StartNewDay()
         {
+            
             Console.WriteLine("Starting a new day!");
             List<Task> tasks = new List<Task>();
             Stopwatch clock = new Stopwatch();
+
             clock.Start();
             foreach (IDynamicObject obj in nonDeadObjects)
             {
-                tasks.Add(Task.Factory.StartNew(() =>
-                {
-                    if (obj.SleepCount > 0)
-                        return;
-                    do
-                    {
-                        switch (obj.State)
-                        {
-                            case State.Alive:
-                                ActAliveObject(obj);
-                                break;
-                            case State.Depressed:
-                                ActDepressedObject(obj);
-                                break;
-                            case State.Dead:
-                                break;
-                        }
-                        board.UpdateStatus(obj);
-                    } while (clock.ElapsedMilliseconds < info.TimePerDay);
-                    obj.CalculateSleep(info.ObjectSleepDaysLow, info.ObjectSleepDaysHigh);
-                }));
+                tasks.Add(Task.Factory.StartNew(DynamicObjectAction, obj));
             }
             Task.WaitAll(tasks.ToArray());
             Console.WriteLine("The day has ended!");
+            clock.Reset();
         }
 
         public int GetANumberOfAliveObjects()
@@ -90,7 +74,7 @@ namespace MyGameLogic
             return nonDeadObjects.Count;
         }
 
-        private void ActDepressedObject(IDynamicObject obj)
+        public void ActDepressedObject(IDynamicObject obj)
         {
             var dynamicObjects = board.GetNearObjects(obj);
             if (dynamicObjects.Count >= info.MinObjectsPerArea && dynamicObjects.Count <= info.MaxObjectsPerArea)
@@ -104,7 +88,7 @@ namespace MyGameLogic
             }
         }
 
-        private void ActAliveObject(IDynamicObject obj)
+        public void ActAliveObject(IDynamicObject obj)
         {
             string action = obj.DecideAction();
             if (action.Equals("Move"))
@@ -118,7 +102,7 @@ namespace MyGameLogic
             }
         }
 
-        private void Move(IDynamicObject obj)
+        public void Move(IDynamicObject obj)
         {
             int x, y;
             do
@@ -133,7 +117,7 @@ namespace MyGameLogic
                 Console.WriteLine("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, obj.X, obj.Y, x, y);
         }
 
-        private void Fight(IDynamicObject obj)
+        public void Fight(IDynamicObject obj)
         {
             Console.WriteLine("Object number {0} is looking for a fight!", obj.Id);
             var dynamicObjects = board.GetNearObjects(obj);
@@ -143,6 +127,28 @@ namespace MyGameLogic
             int index = MyRandom.Next(0, dynamicObjects.Count);
             obj.Fight(dynamicObjects[index]);
         }
-    }
 
+        private void DynamicObjectAction(object obj)
+        {
+            IDynamicObject myObject = (IDynamicObject)obj;
+            if (myObject.SleepCount > 0)
+                return;
+            do
+            {
+                switch (myObject.State)
+                {
+                    case State.Alive:
+                        ActAliveObject(myObject);
+                        break;
+                    case State.Depressed:
+                        ActDepressedObject(myObject);
+                        break;
+                    case State.Dead:
+                        break;
+                }
+                board.UpdateStatus(myObject);
+            } while (clock.ElapsedMilliseconds < info.TimePerDay);
+            myObject.CalculateSleep(info.ObjectSleepDaysLow, info.ObjectSleepDaysHigh);
+        }
+    }
 }

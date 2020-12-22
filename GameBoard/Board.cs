@@ -11,7 +11,7 @@ using StaticObjects;
 
 namespace MyBoard
 {
-    public class Board
+    public class Board : IBoard
     {
         private readonly Tile[,] tiles;
         private readonly Info info;
@@ -93,7 +93,7 @@ namespace MyBoard
             for (int i = Math.Max(0, obj.X - 1); i <= Math.Min(info.Length - 1, obj.X + 1); i++)
                 for (int j = Math.Max(0, obj.Y - 1); j <= Math.Min(info.Hight - 1, obj.Y + 1); j++)
                 {
-                    tiles[i, j].ReaderWriterLockSlim.EnterReadLock();
+                    tiles[i, j].Lock.EnterReadLock();
                     try
                     {
                         if (tiles[i, j].DynamicObject != null && (obj.X != i || obj.Y != j))
@@ -101,7 +101,7 @@ namespace MyBoard
                     }
                     finally
                     {
-                        tiles[i, j].ReaderWriterLockSlim.ExitReadLock();
+                        tiles[i, j].Lock.ExitReadLock();
                     }
                 }
             if ((count < info.MinObjectsPerArea || count > info.MaxObjectsPerArea) && obj.State == State.Alive)
@@ -111,32 +111,21 @@ namespace MyBoard
             }
         }
 
-        public void Release(int i, int j)
-        {
-            var _lock = tiles[i, j].ReaderWriterLockSlim;
-            if (_lock.IsReadLockHeld)
-                _lock.ExitReadLock();
-            else if (_lock.IsUpgradeableReadLockHeld)
-                _lock.ExitUpgradeableReadLock();
-            else if (_lock.IsWriteLockHeld)
-                _lock.ExitWriteLock();
-            else throw new SynchronizationLockException("Trying to release the lock without helding it first");
-        }
-
         public bool TryToMove(IDynamicObject obj, int x, int y)
         {
-
+            if (x >= info.Length || x < 0 || y >= info.Hight || y < 0)
+                throw new ArgumentException("Trying to move outside of the board");
             Tile tileToMove = tiles[x, y];
             Tile myTile = tiles[obj.X, obj.Y];
-            tileToMove.ReaderWriterLockSlim.EnterUpgradeableReadLock();
+            tileToMove.Lock.EnterUpgradeableReadLock();
             try
             {
                 if (tileToMove.DynamicObject == null)
                 {
-                    tileToMove.ReaderWriterLockSlim.EnterWriteLock();
+                    tileToMove.Lock.EnterWriteLock();
                     try
                     {
-                        myTile.ReaderWriterLockSlim.EnterWriteLock();
+                        myTile.Lock.EnterWriteLock();
                         try
                         {
                             tileToMove.DynamicObject = obj;
@@ -149,18 +138,18 @@ namespace MyBoard
                         }
                         finally
                         {
-                            myTile.ReaderWriterLockSlim.ExitWriteLock();
+                            myTile.Lock.ExitWriteLock();
                         }
                     }
                     finally
                     {
-                        tileToMove.ReaderWriterLockSlim.ExitWriteLock();
+                        tileToMove.Lock.ExitWriteLock();
                     }
                 }
             }
             finally
             {
-                tileToMove.ReaderWriterLockSlim.ExitUpgradeableReadLock();
+                tileToMove.Lock.ExitUpgradeableReadLock();
             }
             return false;
         }
@@ -171,7 +160,7 @@ namespace MyBoard
             for (int i = Math.Max(0, obj.X - 1); i <= Math.Min(info.Length - 1, obj.X + 1); i++)
                 for (int j = Math.Max(0, obj.Y - 1); j <= Math.Min(info.Hight - 1, obj.Y + 1); j++)
                 {
-                    tiles[i, j].ReaderWriterLockSlim.EnterReadLock();
+                    tiles[i, j].Lock.EnterReadLock();
                     try
                     {
                         if ((i != obj.X || j != obj.Y) && tiles[i, j].DynamicObject != null)
@@ -181,7 +170,7 @@ namespace MyBoard
                     }
                     finally
                     {
-                        tiles[i, j].ReaderWriterLockSlim.ExitReadLock();
+                        tiles[i, j].Lock.ExitReadLock();
                     }
                 }
             return objects;

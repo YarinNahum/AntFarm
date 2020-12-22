@@ -9,15 +9,22 @@ using StaticObjects;
 
 namespace Tiles
 {
+    /// <summary>
+    /// A class to represent a single tile on the board.
+    /// A Tile instance has: IDynamicObject, IStaticObject and a ReaderWriterLockSlim lock
+    /// See <see cref="IDynamicObject"/>
+    /// <seealso cref="IStaticObject"/>
+    /// <seealso cref="ReaderWriterLockSlim"/>
+    /// </summary>
     public class Tile
     {
         public IDynamicObject DynamicObject { get; set; }
         public IStaticObject StaticObject { get; set; }
-        public ReaderWriterLockSlim ReaderWriterLockSlim { get; }
+        public ReaderWriterLockSlim Lock { get; }
         
         public Tile()
         {
-            this.ReaderWriterLockSlim = new ReaderWriterLockSlim();
+            this.Lock = new ReaderWriterLockSlim();
         }
     }
 }

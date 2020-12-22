@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Configuration;
 using MyGameLogic;
 
@@ -19,6 +20,7 @@ namespace Controller
         {
             maxNumberOfDays = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MaxNumberOfDays"));
             gameLogic = new GameLogic();
+            
         }
 
         public void StartGame()
