@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiles", "Tile\Tiles.csproj"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBoard", "GameBoard\MyBoard.csproj", "{8B5A225E-D326-4B98-9E4C-24FCE482C898}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyGameLogic", "MyController\MyGameLogic.csproj", "{CFDA06F3-B60E-4F00-8864-225BD3205004}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyGameLogic", "GameLogic\MyGameLogic.csproj", "{CFDA06F3-B60E-4F00-8864-225BD3205004}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

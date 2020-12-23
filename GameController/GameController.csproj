@@ -46,7 +46,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MyController\MyGameLogic.csproj">
+    <ProjectReference Include="..\GameLogic\MyGameLogic.csproj">
       <Project>{cfda06f3-b60e-4f00-8864-225bd3205004}</Project>
       <Name>MyGameLogic</Name>
     </ProjectReference>
