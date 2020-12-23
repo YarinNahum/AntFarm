@@ -45,7 +45,7 @@ namespace MyBoard
         /// It must catch the lock at position (x,y) in upgradable mode, if the tile in (x,y)
         /// is empty, than updrade the lock to write mode and catch the lock at the given object position 
         /// in write mode.
-        /// If x or y is out of bounds, it will throw a ArgumentExcaption exception.
+        /// If x or y are  out of bounds, it will throw a ArgumentExcaption exception.
         /// See <see cref="ReaderWriterLockSlim"/>
         /// <seealso cref="Tile"/>
         /// </summary>
@@ -56,14 +56,24 @@ namespace MyBoard
         bool TryToMove(IDynamicObject obj, int x, int y);
 
         /// <summary>
-        /// Get all near objects with the give object at the center.
+        /// Get all near objects with the given position as the center.
         /// Catches each near tile's lock in read mode.
         /// See <see cref="ReaderWriterLockSlim"/>
         /// <seealso cref="Tile"/>
         /// </summary>
-        /// <param name="obj">The object at the center</param>
+        /// <param name="x">The x axis value of the position</param>
+        /// <param name="y">The y axis value of the position</param>
         /// <returns>A list of all the objects near the given object argument</returns>
-        List<IDynamicObject> GetNearObjects(IDynamicObject obj);
+        List<IDynamicObject> GetNearObjects(int x, int y);
+
+        /// <summary>
+        /// Will try to create a IDynamicObject on the board.
+        /// If x or y are out of bounds, it will throw a ArgumentExcaption exception.
+        /// </summary>
+        /// <param name="x">The x axis value of the position</param>
+        /// <param name="y">The y axis value of the position</param>
+        /// <returns>The IDynamicObject if it was created successfully, null otherwise</returns>
+        IDynamicObject TryCreate(int x, int y);
 
 
     }

@@ -4,12 +4,16 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Utils
 {
     public class Info
     {
         private static Info info;
+        private int id;
+        private static object _lock;
+
         private Info()
         {
             try
@@ -28,7 +32,7 @@ namespace Utils
                 ObjectSleepDaysLow = Convert.ToInt32(m.Get("ObjectSleepDaysLow"));
                 ObjectSleepDaysHigh = Convert.ToInt32(m.Get("ObjectSleepDaysHigh"));
                 ID = 1;
-
+                _lock = new object();
             }
             catch (Exception e)
             {
@@ -36,6 +40,8 @@ namespace Utils
             }
 
         }
+
+        #region Properties
         public int FoodPerDay { get;}
         public int ObjectStrengthDecay { get;}
         public int ObjectStartStrengthLow { get;}
@@ -48,15 +54,27 @@ namespace Utils
         public int Hight { get; }
         public int ObjectSleepDaysLow { get; }
         public int ObjectSleepDaysHigh { get; }
-        public int ID { get; set; }
+        public int ID { get 
+            {
+                int val;
+                lock (_lock)
+                {
+                    val = id;
+                    id += 1;
+                }
+                return val;
+
+            }protected set { id = value; } }
 
         public static Info Instance
-        { get
+        { 
+            get
             {
                 if (info == null)
                     info = new Info();
                 return info;
-            } }
-
+            } 
+        }
+        #endregion
     }
 }

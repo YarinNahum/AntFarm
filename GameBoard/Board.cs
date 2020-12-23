@@ -34,9 +34,8 @@ namespace MyBoard
                 int y = MyRandom.Next(0, info.Hight);
                 if (tiles[x, y].DynamicObject == null)
                 {
-                    Ant ant = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y };
+                    IDynamicObject ant = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y };
                     tiles[x, y].DynamicObject = ant;
-                    info.ID++;
                     count--;
                     l.Add(ant);
                 }
@@ -51,20 +50,26 @@ namespace MyBoard
                 for (int j = 0; j < info.Hight; j++)
                 {
                     var tile = tiles[i, j];
-                    if (tile.DynamicObject != null)
+                    tile.Lock.EnterWriteLock();
+                    try
                     {
-                        tile.DynamicObject.AddStrength(-info.ObjectStrengthDecay);
-                        if (tile.DynamicObject.Strength > 0)
+                        if (tile.DynamicObject != null)
                         {
-                            l.Add(tile.DynamicObject);
-                            tile.DynamicObject.Age++;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Object number {0} died!", tile.DynamicObject.Id);
-                            tile.DynamicObject = null;
+                            tile.DynamicObject.AddStrength(-info.ObjectStrengthDecay);
+                            if (tile.DynamicObject.Strength > 0)
+                            {
+                                l.Add(tile.DynamicObject);
+                                tile.DynamicObject.Age++;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Object number {0} died!", tile.DynamicObject.Id);
+                                tile.DynamicObject.SetState(State.Dead);
+                                tile.DynamicObject = null;
+                            }
                         }
                     }
+                    finally { tile.Lock.ExitWriteLock(); }
                 }
             return l;
         }
@@ -117,63 +122,99 @@ namespace MyBoard
                 throw new ArgumentException("Trying to move outside of the board");
             Tile tileToMove = tiles[x, y];
             Tile myTile = tiles[obj.X, obj.Y];
+            myTile.Lock.EnterUpgradeableReadLock();
             tileToMove.Lock.EnterUpgradeableReadLock();
             try
             {
                 if (tileToMove.DynamicObject == null)
                 {
+                    myTile.Lock.EnterWriteLock();
                     tileToMove.Lock.EnterWriteLock();
+
                     try
                     {
-                        myTile.Lock.EnterWriteLock();
-                        try
-                        {
-                            tileToMove.DynamicObject = obj;
-                            myTile.DynamicObject = null;
-                            obj.X = x;
-                            obj.Y = y;
-                            if (tileToMove.StaticObject != null)
-                                tileToMove.StaticObject.ActOnDynamicObject(obj);
-                            return true;
-                        }
-                        finally
-                        {
-                            myTile.Lock.ExitWriteLock();
-                        }
+
+                        tileToMove.DynamicObject = obj;
+                        myTile.DynamicObject = null;
+                        obj.X = x;
+                        obj.Y = y;
+                        if (tileToMove.StaticObject != null)
+                            tileToMove.StaticObject.ActOnDynamicObject(obj);
+                        return true;
                     }
                     finally
                     {
+                        myTile.Lock.ExitWriteLock();
                         tileToMove.Lock.ExitWriteLock();
                     }
                 }
+                else return false;
             }
             finally
             {
+                myTile.Lock.ExitUpgradeableReadLock();
                 tileToMove.Lock.ExitUpgradeableReadLock();
             }
-            return false;
         }
 
-        public List<IDynamicObject> GetNearObjects(IDynamicObject obj)
+        public List<IDynamicObject> GetNearObjects(int x, int y)
         {
             List<IDynamicObject> objects = new List<IDynamicObject>();
-            for (int i = Math.Max(0, obj.X - 1); i <= Math.Min(info.Length - 1, obj.X + 1); i++)
-                for (int j = Math.Max(0, obj.Y - 1); j <= Math.Min(info.Hight - 1, obj.Y + 1); j++)
+            for (int i = Math.Max(0, x - 1); i <= Math.Min(info.Length - 1, x + 1); i++)
+                for (int j = Math.Max(0, y - 1); j <= Math.Min(info.Hight - 1, y + 1); j++)
                 {
-                    tiles[i, j].Lock.EnterReadLock();
-                    try
+                    if (i != x || j != y)
                     {
-                        if ((i != obj.X || j != obj.Y) && tiles[i, j].DynamicObject != null)
+                        tiles[i, j].Lock.EnterReadLock();
+                        try
                         {
-                            objects.Add(tiles[i, j].DynamicObject);
+                            var obj = tiles[i, j].DynamicObject;
+                            if (obj != null)
+                                objects.Add(obj);
+                        }
+                        finally
+                        {
+                            tiles[i, j].Lock.ExitReadLock();
                         }
                     }
-                    finally
-                    {
-                        tiles[i, j].Lock.ExitReadLock();
-                    }
+
                 }
             return objects;
+        }
+
+        public IDynamicObject TryCreate(int x, int y)
+        {
+            if (x >= info.Length || x < 0 || y >= info.Hight || y < 0)
+                throw new ArgumentException("Trying to move outside of the board");
+
+            Tile tile = tiles[x, y];
+
+            tile.Lock.EnterUpgradeableReadLock();
+            try
+            {
+                if (tile.DynamicObject == null)
+                {
+                    var ants = GetNearObjects(x, y);
+                    if (ants.Count == 0)
+                    {
+                        tile.Lock.EnterWriteLock();
+                        try
+                        {
+                            IDynamicObject newAnt = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y };
+                            Console.WriteLine("Id: {2} was created at position {0},{1}", x, y, newAnt.Id);
+                            tile.DynamicObject = newAnt;
+                            return newAnt;
+                        }
+                        finally { tile.Lock.ExitWriteLock(); }
+                    }
+                    else return null;
+                }
+                else return null;
+            }
+            finally
+            {
+                tile.Lock.ExitUpgradeableReadLock();
+            }
         }
     }
 }

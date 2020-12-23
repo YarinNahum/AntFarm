@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
@@ -11,18 +12,31 @@ namespace MyGameLogic
 {
     public class GameLogic : IGameLogic
     {
+        #region variables
         private readonly Info info;
         private readonly Board board;
         private List<IDynamicObject> nonDeadObjects;
         private static long finishedTasksOfTheDay = 0;
+        private static long numberOfDynamicObjects;
+        private readonly ConcurrentDictionary<int, AutoResetEvent> ares;
+        private readonly AutoResetEvent localARE;
         private readonly Stopwatch clock;
+        private readonly AutoResetEvent creatorARE;
+        bool playing;
+        private Thread t;
+        #endregion
 
         public GameLogic()
         {
             info = Info.Instance;
             board = new Board(info.Length, info.Hight);
+      
             nonDeadObjects = new List<IDynamicObject>();
             clock = new Stopwatch();
+            ares = new ConcurrentDictionary<int, AutoResetEvent>();
+            localARE = new AutoResetEvent(false);
+            creatorARE = new AutoResetEvent(false);
+            t = null;
         }
 
         public void GenerateInitialObjects()
@@ -31,6 +45,27 @@ namespace MyGameLogic
             if (count > info.Length * info.Hight)
                 throw new ArgumentException(String.Format("The number of objects to create {0} is bigger than the size of the board {1}", count, info.Length * info.Hight));
             nonDeadObjects = board.GenerateInitialObjects(count);
+            numberOfDynamicObjects = nonDeadObjects.Count;
+
+            foreach (IDynamicObject obj in nonDeadObjects)
+            {
+                ares.TryAdd(obj.Id, new AutoResetEvent(false));
+                Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
+
+            }
+            playing = true;
+
+            t = new Thread(() =>
+            {
+                while (playing)
+                {
+                    creatorARE.WaitOne();
+                    while (clock.ElapsedMilliseconds < info.TimePerDay)
+                        TryCreateObject();
+                }
+            });
+            t.Start();
+
         }
 
         public void WakeUp()
@@ -45,6 +80,7 @@ namespace MyGameLogic
         public void UpdateAlive()
         {
             nonDeadObjects = board.UpdateAndGetAlive();
+            numberOfDynamicObjects = nonDeadObjects.Count;
         }
 
         public void GenerateFood()
@@ -54,17 +90,20 @@ namespace MyGameLogic
 
         public void StartNewDay()
         {
-            
             Console.WriteLine("Starting a new day!");
-            List<Task> tasks = new List<Task>();
-            Stopwatch clock = new Stopwatch();
-
             clock.Start();
-            foreach (IDynamicObject obj in nonDeadObjects)
+
+            foreach (AutoResetEvent are in ares.Values)
             {
-                tasks.Add(Task.Factory.StartNew(DynamicObjectAction, obj));
+                are.Set();
             }
-            Task.WaitAll(tasks.ToArray());
+
+            creatorARE.Set();
+
+            do { localARE.WaitOne(); }
+            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfDynamicObjects));
+            
+            finishedTasksOfTheDay = 0;
             Console.WriteLine("The day has ended!");
             clock.Reset();
         }
@@ -76,7 +115,7 @@ namespace MyGameLogic
 
         public void ActDepressedObject(IDynamicObject obj)
         {
-            var dynamicObjects = board.GetNearObjects(obj);
+            var dynamicObjects = board.GetNearObjects(obj.X, obj.Y);
             if (dynamicObjects.Count >= info.MinObjectsPerArea && dynamicObjects.Count <= info.MaxObjectsPerArea)
             {
                 Console.WriteLine("Object number {0} is no longer depressed, found {1} objects near it", obj.Id, dynamicObjects.Count);
@@ -112,15 +151,17 @@ namespace MyGameLogic
             } while (x == obj.X && y == obj.Y);
 
             Console.WriteLine("Object number {0} wants to move from position: {1},{2} to position {3},{4}", obj.Id, obj.X, obj.Y, x, y);
+            int _x = obj.X;
+            int _y = obj.Y;
             bool result = board.TryToMove(obj, x, y);
             if (result)
-                Console.WriteLine("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, obj.X, obj.Y, x, y);
+                Console.WriteLine("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, _x, _y, x, y);
         }
 
         public void Fight(IDynamicObject obj)
         {
             Console.WriteLine("Object number {0} is looking for a fight!", obj.Id);
-            var dynamicObjects = board.GetNearObjects(obj);
+            var dynamicObjects = board.GetNearObjects(obj.X, obj.Y);
 
             if (dynamicObjects.Count == 0)
                 return;
@@ -131,24 +172,55 @@ namespace MyGameLogic
         private void DynamicObjectAction(object obj)
         {
             IDynamicObject myObject = (IDynamicObject)obj;
-            if (myObject.SleepCount > 0)
-                return;
-            do
+            ares.TryGetValue(myObject.Id, out AutoResetEvent are);
+            are.WaitOne();
+            while (myObject.State != State.Dead)
             {
-                switch (myObject.State)
+                if (myObject.SleepCount == 0)
                 {
-                    case State.Alive:
-                        ActAliveObject(myObject);
-                        break;
-                    case State.Depressed:
-                        ActDepressedObject(myObject);
-                        break;
-                    case State.Dead:
-                        break;
+                    switch (myObject.State)
+                    {
+                        case State.Alive:
+                            ActAliveObject(myObject);
+                            break;
+                        case State.Depressed:
+                            ActDepressedObject(myObject);
+                            break;
+                        case State.Dead:
+                            break;
+                    }
+                    myObject.CalculateSleep(info.ObjectSleepDaysLow, info.ObjectSleepDaysHigh);
+                    board.UpdateStatus(myObject);
                 }
-                board.UpdateStatus(myObject);
-            } while (clock.ElapsedMilliseconds < info.TimePerDay);
-            myObject.CalculateSleep(info.ObjectSleepDaysLow, info.ObjectSleepDaysHigh);
+                Interlocked.Increment(ref finishedTasksOfTheDay);
+
+                localARE.Set();
+
+                are.WaitOne();
+            }
+            ares.TryRemove(myObject.Id, out are);
+            are.Dispose();
         }
+
+        private void TryCreateObject()
+        {
+            int x = MyRandom.Next(0, info.Length);
+            int y = MyRandom.Next(0, info.Hight);
+            IDynamicObject obj = board.TryCreate(x, y);
+            if (obj != null)
+            {
+                AutoResetEvent are = new AutoResetEvent(false);
+                are.Set(); 
+                ares.TryAdd(obj.Id, are);
+                Interlocked.Increment(ref numberOfDynamicObjects);
+                Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
+            }
+        }
+
+        public void Cleanup()
+        {
+            t.Abort();
+        }
+
     }
 }
