@@ -11,6 +11,15 @@ namespace DynamicObjects
 {
     public class Ant : IDynamicObject
     {
+
+        //For testing purposes
+        public Ant()
+        {
+            Id = 0;
+            State = State.Alive;
+            Age = 0;
+            Strength = 3;
+        }
         public Ant(int id, int lowStrength, int highStrength)
         {
             State = State.Alive;

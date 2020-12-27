@@ -17,42 +17,42 @@ namespace DynamicObjects
         /// <summary>
         /// The id of the object.
         /// </summary>
-        public int Id { get;protected set; }
+        public virtual int Id { get;protected set; }
 
         /// <summary>
         /// The current state of the object.
         /// See <see cref="State"/> for all the states
         /// </summary>
-        public State State { get; protected set; }
+        public virtual State State { get; set; }
 
         /// <summary>
         /// The current strength value of the object.
         /// If the strength is 0, the object will die.
         /// </summary>
-        public int Strength { get; protected set; }
+        public virtual int Strength { get;  set; }
 
         /// <summary>
         /// The current age of the object.
         /// The age will grow by 1 each day that passes.
         /// </summary>
-        public int Age { get;  set; }
+        public virtual int Age { get;  set; }
 
         /// <summary>
         /// The current value of how many days the object will sleep.
         /// If SleepCount is bigger than 0, the object will not do any actions that day.
         /// SleepCount decreases each day by 1.
         /// </summary>
-        public int SleepCount { get; protected set; }
+        public virtual int SleepCount { get; protected set; }
 
         /// <summary>
         /// The X axis of the object's position.
         /// </summary>
-        public int X { get; set; }
+        public virtual int X { get; set; }
 
         /// <summary>
         /// The Y axis of the object's position.
         /// </summary>
-        public int Y { get; set; }
+        public virtual int Y { get; set; }
 
         /// <summary>
         /// Add to Strength value by amount

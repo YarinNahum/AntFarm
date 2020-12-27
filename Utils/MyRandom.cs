@@ -10,7 +10,7 @@ namespace Utils
     /// A thread-safe static class to use by several threads.
     /// It uses a global Random instance to generate the seed for
     /// a local Random instance for each thread.
-    /// See<see cref="Random"/>
+    /// See <see cref="Random"/>
     /// <seealso cref="ThreadStaticAttribute"/>
     /// </summary>
     public static class MyRandom

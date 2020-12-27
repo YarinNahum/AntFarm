@@ -16,6 +16,13 @@ namespace MyBoard
         private readonly Tile[,] tiles;
         private readonly Info info;
 
+        //for testing purposes
+        public Board (Tile[,] tiles, Info info)
+        {
+            this.info = info;
+            this.tiles = tiles;
+        }
+
         public Board(int length, int hight)
         {
             info = Info.Instance;

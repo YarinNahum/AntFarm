@@ -10,11 +10,10 @@ using Utils;
 
 namespace MyBoard
 {
-    interface IBoard
+    public interface IBoard
     {
         /// <summary>
         /// Generates dynamic objects on the board.
-        /// Each position is random. See <see cref="MyRandom"/>
         /// </summary>
         /// <param name="count">The number of dynamic objects to create</param>
         /// <returns>A list of all the generated objects</returns>
