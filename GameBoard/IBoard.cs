@@ -20,10 +20,9 @@ namespace MyBoard
         List<IDynamicObject> GenerateInitialObjects(int count);
 
         /// <summary>
-        /// Update the locally stored list of dynamic objects that are alive.
+        /// Update all the objects that are currently on the board.
         /// </summary>
-        /// <returns>A list of all the dynamic objects that are alive after the update</returns>
-        List<IDynamicObject> UpdateAndGetAlive();
+        List<IDynamicObject> UpdateStatusAll();
 
         /// <summary>
         /// Generate static objects on the board by amount specified in the Info class
@@ -75,6 +74,11 @@ namespace MyBoard
         /// <returns>The IDynamicObject if it was created successfully, null otherwise</returns>
         IDynamicObject TryCreate(int x, int y);
 
+        /// <summary>
+        /// Get all the objects that are alive on the board
+        /// </summary>
+        /// <returns>A list of IDynamicObject</returns>
+        List<IDynamicObject> GetAlive();
 
     }
 }

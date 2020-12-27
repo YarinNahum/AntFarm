@@ -43,35 +43,32 @@ namespace MyBoard
             return l;
         }
 
-        public List<IDynamicObject> UpdateAndGetAlive()
+        public List<IDynamicObject> UpdateStatusAll()
         {
-            var l = new List<IDynamicObject>();
-            for (int i = 0; i < info.Length; i++)
-                for (int j = 0; j < info.Hight; j++)
+            var l = GetAlive();
+            List<IDynamicObject> antsAlive = new List<IDynamicObject>();
+            foreach (IDynamicObject obj in l)
+            {
+                var tile = tiles[obj.X, obj.Y];
+                tile.Lock.EnterWriteLock();
+                try
                 {
-                    var tile = tiles[i, j];
-                    tile.Lock.EnterWriteLock();
-                    try
+                    obj.AddStrength(-info.ObjectStrengthDecay);
+                    if (obj.Strength > 0)
                     {
-                        if (tile.DynamicObject != null)
-                        {
-                            tile.DynamicObject.AddStrength(-info.ObjectStrengthDecay);
-                            if (tile.DynamicObject.Strength > 0)
-                            {
-                                l.Add(tile.DynamicObject);
-                                tile.DynamicObject.Age++;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Object number {0} died!", tile.DynamicObject.Id);
-                                tile.DynamicObject.SetState(State.Dead);
-                                tile.DynamicObject = null;
-                            }
-                        }
+                        obj.Age++;
+                        antsAlive.Add(obj);
                     }
-                    finally { tile.Lock.ExitWriteLock(); }
+                    else
+                    {
+                        Console.WriteLine("Object number {0} died!", obj.Id);
+                        obj.SetState(State.Dead);
+                        tile.DynamicObject = null;
+                    }
                 }
-            return l;
+                finally { tile.Lock.ExitWriteLock(); }
+            }
+            return antsAlive;
         }
 
         public void GenetareFood()
@@ -215,6 +212,26 @@ namespace MyBoard
             {
                 tile.Lock.ExitUpgradeableReadLock();
             }
+        }
+
+        public List<IDynamicObject> GetAlive()
+        {
+            List<IDynamicObject> l = new List<IDynamicObject>();
+            for(int i = 0; i < info.Length; i++)
+                for(int j = 0; j < info.Hight; j++)
+                {
+                    tiles[i, j].Lock.EnterReadLock();
+                    try
+                    {
+                        if (tiles[i, j].DynamicObject != null && tiles[i, j].DynamicObject.State != State.Dead)
+                            l.Add(tiles[i, j].DynamicObject);
+                    }
+                    finally
+                    {
+                        tiles[i, j].Lock.ExitReadLock();
+                    }
+                }
+            return l;
         }
     }
 }

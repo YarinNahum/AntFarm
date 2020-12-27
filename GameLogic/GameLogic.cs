@@ -15,15 +15,12 @@ namespace MyGameLogic
         #region variables
         private readonly Info info;
         private readonly Board board;
-        private List<IDynamicObject> nonDeadObjects;
         private static long finishedTasksOfTheDay = 0;
-        private static long numberOfDynamicObjects;
         private readonly ConcurrentDictionary<int, AutoResetEvent> ares;
-        private readonly AutoResetEvent localARE;
+        private readonly AutoResetEvent mainThreadARE;
         private readonly Stopwatch clock;
-        private readonly AutoResetEvent creatorARE;
+        private readonly AutoResetEvent creatorTaskARE;
         bool playing;
-        private Thread t;
         #endregion
 
         public GameLogic()
@@ -31,12 +28,10 @@ namespace MyGameLogic
             info = Info.Instance;
             board = new Board(info.Length, info.Hight);
       
-            nonDeadObjects = new List<IDynamicObject>();
             clock = new Stopwatch();
             ares = new ConcurrentDictionary<int, AutoResetEvent>();
-            localARE = new AutoResetEvent(false);
-            creatorARE = new AutoResetEvent(false);
-            t = null;
+            mainThreadARE = new AutoResetEvent(false);
+            creatorTaskARE = new AutoResetEvent(false);
         }
 
         public void GenerateInitialObjects()
@@ -44,8 +39,7 @@ namespace MyGameLogic
             int count = info.NumberOfObjects;
             if (count > info.Length * info.Hight)
                 throw new ArgumentException(String.Format("The number of objects to create {0} is bigger than the size of the board {1}", count, info.Length * info.Hight));
-            nonDeadObjects = board.GenerateInitialObjects(count);
-            numberOfDynamicObjects = nonDeadObjects.Count;
+            var nonDeadObjects = board.GenerateInitialObjects(count);
 
             foreach (IDynamicObject obj in nonDeadObjects)
             {
@@ -55,21 +49,21 @@ namespace MyGameLogic
             }
             playing = true;
 
-            t = new Thread(() =>
+            Task.Factory.StartNew(() =>
             {
                 while (playing)
                 {
-                    creatorARE.WaitOne();
                     while (clock.ElapsedMilliseconds < info.TimePerDay)
                         TryCreateObject();
+                    creatorTaskARE.WaitOne();
                 }
             });
-            t.Start();
 
         }
 
         public void WakeUp()
         {
+            var nonDeadObjects = board.UpdateStatusAll();
             foreach (IDynamicObject obj in nonDeadObjects)
             {
                 if (obj.SleepCount != 0)
@@ -79,8 +73,7 @@ namespace MyGameLogic
 
         public void UpdateAlive()
         {
-            nonDeadObjects = board.UpdateAndGetAlive();
-            numberOfDynamicObjects = nonDeadObjects.Count;
+            board.UpdateStatusAll();
         }
 
         public void GenerateFood()
@@ -90,6 +83,7 @@ namespace MyGameLogic
 
         public void StartNewDay()
         {
+            finishedTasksOfTheDay = 0;
             Console.WriteLine("Starting a new day!");
             clock.Start();
 
@@ -98,19 +92,26 @@ namespace MyGameLogic
                 are.Set();
             }
 
-            creatorARE.Set();
+            playing = true;
+            long numberOfAnts = ares.Count;
 
-            do { localARE.WaitOne(); }
-            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfDynamicObjects));
+            creatorTaskARE.Set();
+
+            do { 
+                mainThreadARE.WaitOne();
+                numberOfAnts = ares.Count;
+            }
+            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts));
+
             
-            finishedTasksOfTheDay = 0;
             Console.WriteLine("The day has ended!");
             clock.Reset();
         }
 
         public int GetANumberOfAliveObjects()
         {
-            return nonDeadObjects.Count;
+            List<IDynamicObject> l = board.GetAlive();
+            return l.Count;
         }
 
         public void ActDepressedObject(IDynamicObject obj)
@@ -194,12 +195,11 @@ namespace MyGameLogic
                 }
                 Interlocked.Increment(ref finishedTasksOfTheDay);
 
-                localARE.Set();
+                mainThreadARE.Set();
 
                 are.WaitOne();
             }
             ares.TryRemove(myObject.Id, out are);
-            are.Dispose();
         }
 
         private void TryCreateObject()
@@ -212,15 +212,10 @@ namespace MyGameLogic
                 AutoResetEvent are = new AutoResetEvent(false);
                 are.Set(); 
                 ares.TryAdd(obj.Id, are);
-                Interlocked.Increment(ref numberOfDynamicObjects);
                 Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
             }
         }
 
-        public void Cleanup()
-        {
-            t.Abort();
-        }
-
+ 
     }
 }
