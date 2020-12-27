@@ -26,6 +26,7 @@ namespace Controller
         public void StartGame()
         {
             gameLogic.GenerateInitialObjects();
+
             while (maxNumberOfDays > 0)
             {
                 maxNumberOfDays--;
@@ -33,7 +34,7 @@ namespace Controller
                 if (dynamicObjectCount == 0)
                 {
                     Console.WriteLine("All the objects are dead.");
-                    Console.WriteLine("Press enter to close the terminal");
+                    Console.WriteLine("Click enter to close the terminal");
                     Console.ReadLine();
                     Environment.Exit(0);
                 }
@@ -43,7 +44,7 @@ namespace Controller
                 gameLogic.UpdateAlive();
             }
             Console.WriteLine("All days have passed. Click enter to exit");
-            string s = Console.ReadLine();
+            Console.ReadLine();
             
         }
     }

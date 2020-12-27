@@ -22,12 +22,18 @@ namespace DynamicObjects
 
         public override void Fight(IDynamicObject other)
         {
+            // a local Action for the winner and the loser
             void act(IDynamicObject winner, IDynamicObject loser) {
+                // add 2 to the strength of the winner
                 winner.AddStrength(2); 
+                // the loser is now depressed
                 loser.SetState(State.Depressed);
+
                 Console.WriteLine("Object number {0} won agains object number {1}\nWinner position: {2},{3}\nLoser Position {4},{5}",
                     winner.Id,loser.Id, winner.X,winner.Y,loser.X,loser.Y); 
             }
+            /// the winner of the fight is the object with more strength. if the strengths of objects are the same
+            /// than there is no winner
             if (Strength > other.Strength)
                 act(this, other);
             else if (other.Strength > Strength)

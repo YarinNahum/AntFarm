@@ -17,18 +17,18 @@ namespace MyGameLogic
         /// The number of objects to create is given with the value of <see cref="Info.NumberOfObjects"/>.
         /// If the count is bigger than the dimensions of the board, it will throw a ArgumentException exception.
         /// See <see cref="Board"/>
+        /// 
         /// <seealso cref="IDynamicObject"/>
-        /// <see cref=""/>
         /// </summary>
         void GenerateInitialObjects();
 
         /// <summary>
-        /// Calls <see cref="IDynamicObject.WakeUp"/> for each alive object on the board.
+        /// Wake up each dynamic object on the board.
         /// </summary>
         void WakeUp();
 
         /// <summary>
-        /// Calls <see cref="IBoard.UpdateAndGetAlive"/> and stores the return value in a locally stored variable.
+        /// Update the dynamic objects that are alive.
         /// </summary>
         void UpdateAlive();
 
@@ -81,6 +81,11 @@ namespace MyGameLogic
         /// on the board using <see cref="TaskFactory"/> 
         /// </summary>
         void StartNewDay();
+
+        /// <summary>
+        /// Generate food 
+        /// </summary>
+        void GenerateFood();
 
     }
 }

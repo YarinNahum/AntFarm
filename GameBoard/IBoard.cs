@@ -14,14 +14,16 @@ namespace MyBoard
     {
         /// <summary>
         /// Generates dynamic objects on the board.
+        /// Each position is random. See <see cref="MyRandom"/>
         /// </summary>
         /// <param name="count">The number of dynamic objects to create</param>
         /// <returns>A list of all the generated objects</returns>
         List<IDynamicObject> GenerateInitialObjects(int count);
 
         /// <summary>
-        /// Update all the objects that are currently on the board.
+        /// Update all the objects that are currently on the board, and return all the alive objects.
         /// </summary>
+        /// <returns >The list of all the alive objects on the board</returns>
         List<IDynamicObject> UpdateStatusAll();
 
         /// <summary>
@@ -40,12 +42,8 @@ namespace MyBoard
         void UpdateStatus(IDynamicObject obj);
 
         /// <summary>
-        /// Trying to move the given object to the position (x,y).
-        /// It must catch the lock at position (x,y) in upgradable mode, if the tile in (x,y)
-        /// is empty, than updrade the lock to write mode and catch the lock at the given object position 
-        /// in write mode.
+        /// Try to move the given object to the position (x,y).
         /// If x or y are  out of bounds, it will throw a ArgumentExcaption exception.
-        /// See <see cref="ReaderWriterLockSlim"/>
         /// <seealso cref="Tile"/>
         /// </summary>
         /// <param name="obj">The object trying to move</param>
