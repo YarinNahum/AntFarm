@@ -14,14 +14,20 @@ namespace MyBoard
     public class Board : IBoard
     {
         private readonly Tile[,] tiles;
-        private readonly Info info;
+        private readonly IInfo info;
+        private readonly IRandomTest rnd;
+        private readonly RandomOption randomOption = RandomOption.RealTime;
+
 
         //for testing purposes
-        public Board (Tile[,] tiles, Info info)
+        public Board (Tile[,] tiles, IInfo info, IRandomTest rnd)
         {
             this.info = info;
             this.tiles = tiles;
+            this.rnd = rnd;
+            randomOption = RandomOption.Testing;
         }
+
 
         public Board(int length, int hight)
         {
@@ -37,10 +43,19 @@ namespace MyBoard
             List<IDynamicObject> l = new List<IDynamicObject>();
             while (count > 0)
             {
-
-                // get a random position on the board
-                int x = MyRandom.Next(0, info.Length);
-                int y = MyRandom.Next(0, info.Hight);
+                int x = 0, y = 0;
+                switch(randomOption)
+                {
+                    case RandomOption.RealTime:
+                    // get a random position on the board
+                        x = MyRandom.Next(0, info.Length);
+                        y = MyRandom.Next(0, info.Hight);
+                        break;
+                    case RandomOption.Testing:
+                        x = rnd.Next(0, info.Length);
+                        y = rnd.Next(0, info.Hight);
+                        break;
+                }
 
                 // create a IDynamicObject at (x,y) if there isn't one already.
                 if (tiles[x, y].DynamicObject == null)
@@ -286,4 +301,6 @@ namespace MyBoard
             return l;
         }
     }
+
+    public enum RandomOption {RealTime, Testing };
 }

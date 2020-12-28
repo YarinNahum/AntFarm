@@ -42,7 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IInfo.cs" />
     <Compile Include="Info.cs" />
+    <Compile Include="IRandomTest.cs" />
     <Compile Include="MyRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

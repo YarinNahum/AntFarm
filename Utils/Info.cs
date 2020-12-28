@@ -8,13 +8,14 @@ using System.Threading;
 
 namespace Utils
 {
-    public class Info
+    public class Info : IInfo
     {
         private static Info info;
         private int id;
         private static object _lock;
 
-        private Info()
+        
+        public Info()
         {
             try
             {
