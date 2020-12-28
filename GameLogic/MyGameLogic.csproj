@@ -54,6 +54,10 @@
       <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
       <Name>Objects</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ProducerConsumer\ProducerConsumer.csproj">
+      <Project>{64405c3f-cd38-42fd-aa97-f45352303f0b}</Project>
+      <Name>ProducerConsumer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>
       <Name>Utils</Name>

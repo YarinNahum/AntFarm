@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 using Tiles;
 using Utils;
 using DynamicObjects;
 using StaticObjects;
+using ProducerConsumer;
 
 namespace MyBoard
 {
@@ -17,21 +14,24 @@ namespace MyBoard
         private readonly IInfo info;
         private readonly IRandomTest rnd;
         private readonly RandomOption randomOption = RandomOption.RealTime;
+        private readonly IProducerConsumerMessages<string> producerConsumer;
 
 
         //for testing purposes
-        public Board (Tile[,] tiles, IInfo info, IRandomTest rnd)
+        public Board(Tile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer)
         {
             this.info = info;
             this.tiles = tiles;
             this.rnd = rnd;
             randomOption = RandomOption.Testing;
+            this.producerConsumer = producerConsumer;
         }
 
 
-        public Board(int length, int hight)
+        public Board(int length, int hight, IProducerConsumerMessages<string> producerConsumer)
         {
             info = Info.Instance;
+            this.producerConsumer = producerConsumer;
             tiles = new Tile[length, hight];
             for (int i = 0; i < length; i++)
                 for (int j = 0; j < hight; j++)
@@ -44,10 +44,10 @@ namespace MyBoard
             while (count > 0)
             {
                 int x = 0, y = 0;
-                switch(randomOption)
+                switch (randomOption)
                 {
                     case RandomOption.RealTime:
-                    // get a random position on the board
+                        // get a random position on the board
                         x = MyRandom.Next(0, info.Length);
                         y = MyRandom.Next(0, info.Hight);
                         break;
@@ -60,7 +60,7 @@ namespace MyBoard
                 // create a IDynamicObject at (x,y) if there isn't one already.
                 if (tiles[x, y].DynamicObject == null)
                 {
-                    IDynamicObject ant = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y };
+                    IDynamicObject ant = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
                     tiles[x, y].DynamicObject = ant;
                     count--;
                     l.Add(ant);
@@ -93,7 +93,7 @@ namespace MyBoard
                     }
                     else
                     {
-                        Console.WriteLine("Object number {0} died!", obj.Id);
+                        producerConsumer.Produce(String.Format("Object number {0} died!", obj.Id));
                         obj.SetState(State.Dead);
                         tile.DynamicObject = null;
                     }
@@ -108,9 +108,19 @@ namespace MyBoard
             // tries to genenarte StaticObjects on the board
             for (int i = 0; i < info.FoodPerDay; i++)
             {
-                // get a random position on the board
-                int x = MyRandom.Next(0, info.Length);
-                int y = MyRandom.Next(0, info.Hight);
+                int x = 0, y = 0;
+                switch (randomOption)
+                {
+                    case RandomOption.RealTime:
+                        // get a random position on the board
+                        x = MyRandom.Next(0, info.Length);
+                        y = MyRandom.Next(0, info.Hight);
+                        break;
+                    case RandomOption.Testing:
+                        x = rnd.Next(0, info.Length);
+                        y = rnd.Next(0, info.Hight);
+                        break;
+                }
                 if (tiles[x, y].StaticObject == null)
                     // if there is already a dynamic object, generate food and act on it directly.
                     if (tiles[x, y].DynamicObject != null)
@@ -150,7 +160,7 @@ namespace MyBoard
             /// the object's state will become <see cref="State.Depressed"/>.
             if ((count < info.MinObjectsPerArea || count > info.MaxObjectsPerArea) && obj.State == State.Alive)
             {
-                Console.WriteLine("Object number {0} became depressed!", obj.Id);
+                producerConsumer.Produce(String.Format("Object number {0} became depressed!", obj.Id));
                 obj.SetState(State.Depressed);
             }
         }
@@ -258,8 +268,8 @@ namespace MyBoard
                         try
                         {
                             // creates a new and and return it.
-                            IDynamicObject newAnt = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y };
-                            Console.WriteLine("Id: {2} was created at position {0},{1}", x, y, newAnt.Id);
+                            IDynamicObject newAnt = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y , ProducerConsumer = producerConsumer};
+                            producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, newAnt.Id));
                             tile.DynamicObject = newAnt;
                             return newAnt;
                         }
@@ -282,8 +292,8 @@ namespace MyBoard
             List<IDynamicObject> l = new List<IDynamicObject>();
 
             // loop around the board
-            for(int i = 0; i < info.Length; i++)
-                for(int j = 0; j < info.Hight; j++)
+            for (int i = 0; i < info.Length; i++)
+                for (int j = 0; j < info.Hight; j++)
                 {
                     // catch the lock at (i,j) with read mode
                     tiles[i, j].Lock.EnterReadLock();
@@ -302,5 +312,5 @@ namespace MyBoard
         }
     }
 
-    public enum RandomOption {RealTime, Testing };
+    public enum RandomOption { RealTime, Testing };
 }

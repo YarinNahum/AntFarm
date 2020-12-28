@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils;
 using StaticObjects;
+using ProducerConsumer;
 
 namespace DynamicObjects
 {
@@ -54,6 +55,9 @@ namespace DynamicObjects
         /// </summary>
         public virtual int Y { get; set; }
 
+        public virtual IProducerConsumerMessages<string> ProducerConsumer { get; set; }
+
+
         /// <summary>
         /// Add to Strength value by amount
         /// </summary>
@@ -62,6 +66,7 @@ namespace DynamicObjects
         {
             Strength += amount;
         }
+
 
         /// <summary>
         /// Set the State value by state

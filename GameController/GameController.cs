@@ -33,6 +33,7 @@ namespace Controller
                 int dynamicObjectCount = gameLogic.GetANumberOfAliveObjects();
                 if (dynamicObjectCount == 0)
                 {
+                    gameLogic.ConsumeAllMessages();
                     Console.WriteLine("All the objects are dead.");
                     Console.WriteLine("Click enter to close the terminal");
                     Console.ReadLine();
@@ -43,6 +44,7 @@ namespace Controller
                 gameLogic.GenerateFood();
                 gameLogic.UpdateAlive();
             }
+            gameLogic.ConsumeAllMessages();
             Console.WriteLine("All days have passed. Click enter to exit");
             Console.ReadLine();
             

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D612BA38-ED0D-4B28-9266-2AA2463C6A21}</ProjectGuid>
+    <ProjectGuid>{64405C3F-CD38-42FD-AA97-F45352303F0B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Interfaces</RootNamespace>
-    <AssemblyName>Interfaces</AssemblyName>
+    <RootNamespace>ProducerConsumer</RootNamespace>
+    <AssemblyName>ProducerConsumer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -41,21 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\Ant.cs" />
-    <Compile Include="Classes\Food.cs" />
-    <Compile Include="Interfaces\IDynamicObject.cs" />
-    <Compile Include="Interfaces\IStaticObject.cs" />
+    <Compile Include="IProducerConsumerMessages.cs" />
+    <Compile Include="ProducerConsumerMessages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ProducerConsumer\ProducerConsumer.csproj">
-      <Project>{64405c3f-cd38-42fd-aa97-f45352303f0b}</Project>
-      <Name>ProducerConsumer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Utils\Utils.csproj">
-      <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>
-      <Name>Utils</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

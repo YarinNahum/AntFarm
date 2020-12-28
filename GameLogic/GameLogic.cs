@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Utils;
 using DynamicObjects;
 using MyBoard;
+using ProducerConsumer;
 
 namespace MyGameLogic
 {
@@ -30,17 +31,19 @@ namespace MyGameLogic
         //an AutoResetEvent for the task that creates additional dynamic objects mid-run
         private readonly AutoResetEvent creatorTaskARE;
         bool playing;
+
+        private readonly IProducerConsumerMessages<string> producerConsumer;
         #endregion
 
         public GameLogic()
         {
             info = Info.Instance;
-            board = new Board(info.Length, info.Hight);
-      
             clock = new Stopwatch();
             ares = new ConcurrentDictionary<int, AutoResetEvent>();
             mainThreadARE = new AutoResetEvent(false);
             creatorTaskARE = new AutoResetEvent(false);
+            producerConsumer = new ProducerConsumerMessages();
+            board = new Board(info.Length, info.Hight,producerConsumer);
         }
 
         public void GenerateInitialObjects()
@@ -98,7 +101,7 @@ namespace MyGameLogic
         public void StartNewDay()
         {
             finishedTasksOfTheDay = 0;
-            Console.WriteLine("Starting a new day!");
+            producerConsumer.Produce("Starting a new day!");
 
             // start the clock for the day
             clock.Start();
@@ -123,7 +126,7 @@ namespace MyGameLogic
             while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts));
 
             
-            Console.WriteLine("The day has ended!");
+            producerConsumer.Produce("The day has ended!");
             // reset the clock
             clock.Reset();
         }
@@ -143,12 +146,12 @@ namespace MyGameLogic
             /// than the given object will no longer be depressed.
             if (dynamicObjects.Count >= info.MinObjectsPerArea && dynamicObjects.Count <= info.MaxObjectsPerArea)
             {
-                Console.WriteLine("Object number {0} is no longer depressed, found {1} objects near it", obj.Id, dynamicObjects.Count);
+                producerConsumer.Produce(String.Format("Object number {0} is no longer depressed, found {1} objects near it", obj.Id, dynamicObjects.Count));
                 obj.SetState(State.Alive);
             }
             else
             {
-                Console.WriteLine("Object number {0} is still depressed, found {1} objects near it", obj.Id, dynamicObjects.Count);
+                producerConsumer.Produce(String.Format("Object number {0} is still depressed, found {1} objects near it", obj.Id, dynamicObjects.Count));
             }
         }
 
@@ -163,7 +166,7 @@ namespace MyGameLogic
             }
             else if (action.Equals("Fight"))
             {
-                Console.WriteLine("Object number {0} is looking for a fight!", obj.Id);
+                producerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", obj.Id));
                 Fight(obj);
             }
         }
@@ -178,7 +181,7 @@ namespace MyGameLogic
                 y = MyRandom.Next(Math.Max(0, obj.Y - 1), Math.Min(info.Hight, obj.Y + 2));
             } while (x == obj.X && y == obj.Y);
 
-            Console.WriteLine("Object number {0} wants to move from position: {1},{2} to position {3},{4}", obj.Id, obj.X, obj.Y, x, y);
+            producerConsumer.Produce(String.Format("Object number {0} wants to move from position: {1},{2} to position {3},{4}", obj.Id, obj.X, obj.Y, x, y));
             
             //for printing purposes
             int _x = obj.X;
@@ -187,12 +190,12 @@ namespace MyGameLogic
             // try to move the object to the random position (x,y)
             bool result = board.TryToMove(obj, x, y);
             if (result)
-                Console.WriteLine("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, _x, _y, x, y);
+                producerConsumer.Produce(String.Format("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, _x, _y, x, y));
         }
 
         public void Fight(IDynamicObject obj)
         {
-            Console.WriteLine("Object number {0} is looking for a fight!", obj.Id);
+            producerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", obj.Id));
             
             // get all objects near the given object
             var dynamicObjects = board.GetNearObjects(obj.X, obj.Y);
@@ -268,5 +271,9 @@ namespace MyGameLogic
             }
         }
 
+        public void ConsumeAllMessages()
+        {
+            producerConsumer.ConsumeAll();
+        }
     }
 }

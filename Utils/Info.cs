@@ -12,8 +12,43 @@ namespace Utils
     {
         private static Info info;
         private int id;
-        private static object _lock;
+        private static object idLock;
 
+        #region Properties
+        public int FoodPerDay { get;}
+        public int ObjectStrengthDecay { get;}
+        public int ObjectStartStrengthLow { get;}
+        public int ObjectStartStrengthHigh { get; }
+        public int MinObjectsPerArea { get; }
+        public int MaxObjectsPerArea { get;}
+        public int TimePerDay { get;}
+        public int NumberOfObjects { get; }
+        public int Length { get; }
+        public int Hight { get; }
+        public int ObjectSleepDaysLow { get; }
+        public int ObjectSleepDaysHigh { get; }
+        public int ID { get 
+            {
+                int val;
+                lock (idLock)
+                {
+                    val = id;
+                    id += 1;
+                }
+                return val;
+
+            }protected set { id = value; } }
+
+        public static Info Instance
+        { 
+            get
+            {
+                if (info == null)
+                    info = new Info();
+                return info;
+            } 
+        }
+        #endregion
         
         public Info()
         {
@@ -33,7 +68,7 @@ namespace Utils
                 ObjectSleepDaysLow = Convert.ToInt32(m.Get("ObjectSleepDaysLow"));
                 ObjectSleepDaysHigh = Convert.ToInt32(m.Get("ObjectSleepDaysHigh"));
                 ID = 1;
-                _lock = new object();
+                idLock = new object();
             }
             catch (Exception e)
             {
@@ -42,40 +77,5 @@ namespace Utils
 
         }
 
-        #region Properties
-        public int FoodPerDay { get;}
-        public int ObjectStrengthDecay { get;}
-        public int ObjectStartStrengthLow { get;}
-        public int ObjectStartStrengthHigh { get; }
-        public int MinObjectsPerArea { get; }
-        public int MaxObjectsPerArea { get;}
-        public int TimePerDay { get;}
-        public int NumberOfObjects { get; }
-        public int Length { get; }
-        public int Hight { get; }
-        public int ObjectSleepDaysLow { get; }
-        public int ObjectSleepDaysHigh { get; }
-        public int ID { get 
-            {
-                int val;
-                lock (_lock)
-                {
-                    val = id;
-                    id += 1;
-                }
-                return val;
-
-            }protected set { id = value; } }
-
-        public static Info Instance
-        { 
-            get
-            {
-                if (info == null)
-                    info = new Info();
-                return info;
-            } 
-        }
-        #endregion
     }
 }

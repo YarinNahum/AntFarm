@@ -15,8 +15,8 @@ namespace Utils
     /// </summary>
     public static class MyRandom
     {
-        private static Random _global = new Random();
-        [ThreadStatic] private static Random _local;
+        private static readonly Random global = new Random();
+        [ThreadStatic] private static Random local;
 
         /// <summary>
         /// Returns a random integer an interval
@@ -27,16 +27,16 @@ namespace Utils
         /// <returns>A random integer value from an interval </returns>
         public static int Next(int low, int high)
         {
-            if (_local == null)
+            if (local == null)
             {
-                lock (_global)
+                lock (global)
                 {
 
-                    int seed = _global.Next();
-                    _local = new Random(seed);
+                    int seed = global.Next();
+                    local = new Random(seed);
                 }
             }
-            return _local.Next(low, high);
+            return local.Next(low, high);
         }
 
         /// <summary>
@@ -46,16 +46,16 @@ namespace Utils
         /// <returns>A random double value from the interval (0,1) </returns>
         public static double NextDouble()
         {
-            if (_local == null)
+            if (local == null)
             {
-                lock (_global)
+                lock (global)
                 {
 
-                    int seed = _global.Next();
-                    _local = new Random(seed);
+                    int seed = global.Next();
+                    local = new Random(seed);
                 }
             }
-            return _local.NextDouble();
+            return local.NextDouble();
         }
     }
 

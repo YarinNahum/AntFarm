@@ -38,8 +38,8 @@ namespace DynamicObjects
                 // the loser is now depressed
                 loser.SetState(State.Depressed);
 
-                Console.WriteLine("Object number {0} won agains object number {1}\nWinner position: {2},{3}\nLoser Position {4},{5}",
-                    winner.Id,loser.Id, winner.X,winner.Y,loser.X,loser.Y); 
+                ProducerConsumer.Produce(String.Format("Object number {0} won agains object number {1}\nWinner position: {2},{3}\nLoser Position {4},{5}",
+                    winner.Id,loser.Id, winner.X,winner.Y,loser.X,loser.Y)); 
             }
             /// the winner of the fight is the object with more strength. if the strengths of objects are the same
             /// than there is no winner
@@ -51,7 +51,7 @@ namespace DynamicObjects
 
         public override void ActOnStaticObject(Food x)
         {
-            Console.WriteLine("Ant number {0} ate food!", Id);
+            ProducerConsumer.Produce(String.Format("Ant number {0} ate food!", Id));
             Strength += 2;
         }
     }
