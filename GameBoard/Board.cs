@@ -10,15 +10,16 @@ namespace MyBoard
 {
     public class Board : IBoard
     {
-        private readonly Tile[,] tiles;
-        private readonly IInfo info;
-        private readonly IRandomTest rnd;
-        private readonly RandomOption randomOption = RandomOption.RealTime;
-        private readonly IProducerConsumerMessages<string> producerConsumer;
+        private  Tile[,] tiles;
+        private  IInfo info;
+        private  IRandomTest rnd;
+        private  RandomOption randomOption = RandomOption.RealTime;
+        private  IProducerConsumerMessages<string> producerConsumer;
 
 
+        public Board() { }
         //for testing purposes
-        public Board(Tile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer)
+        public void TestBoard(Tile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer)
         {
             this.info = info;
             this.tiles = tiles;
@@ -43,19 +44,8 @@ namespace MyBoard
             List<IDynamicObject> l = new List<IDynamicObject>();
             while (count > 0)
             {
-                int x = 0, y = 0;
-                switch (randomOption)
-                {
-                    case RandomOption.RealTime:
-                        // get a random position on the board
-                        x = MyRandom.Next(0, info.Length);
-                        y = MyRandom.Next(0, info.Hight);
-                        break;
-                    case RandomOption.Testing:
-                        x = rnd.Next(0, info.Length);
-                        y = rnd.Next(0, info.Hight);
-                        break;
-                }
+                var t = GetRandomPosition();
+                int x = t.Item1, y = t.Item2;
 
                 // create a IDynamicObject at (x,y) if there isn't one already.
                 if (tiles[x, y].DynamicObject == null)
@@ -108,19 +98,8 @@ namespace MyBoard
             // tries to genenarte StaticObjects on the board
             for (int i = 0; i < info.FoodPerDay; i++)
             {
-                int x = 0, y = 0;
-                switch (randomOption)
-                {
-                    case RandomOption.RealTime:
-                        // get a random position on the board
-                        x = MyRandom.Next(0, info.Length);
-                        y = MyRandom.Next(0, info.Hight);
-                        break;
-                    case RandomOption.Testing:
-                        x = rnd.Next(0, info.Length);
-                        y = rnd.Next(0, info.Hight);
-                        break;
-                }
+                var t = GetRandomPosition();
+                int x = t.Item1, y = t.Item2;
                 if (tiles[x, y].StaticObject == null)
                     // if there is already a dynamic object, generate food and act on it directly.
                     if (tiles[x, y].DynamicObject != null)
@@ -309,6 +288,24 @@ namespace MyBoard
                     }
                 }
             return l;
+        }
+
+        public Tuple<int,int> GetRandomPosition()
+        {
+            int x=0, y=0;
+            switch (randomOption)
+            {
+                case RandomOption.RealTime:
+                    // get a random position on the board
+                    x = MyRandom.Next(0, info.Length);
+                    y = MyRandom.Next(0, info.Hight);
+                    break;
+                case RandomOption.Testing:
+                    x = rnd.Next(0, info.Length);
+                    y = rnd.Next(0, info.Hight);
+                    break;
+            }
+            return new Tuple<int, int>(x, y);
         }
     }
 

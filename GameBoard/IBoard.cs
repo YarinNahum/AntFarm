@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tiles;
+using ProducerConsumer;
 using System.Threading;
 using DynamicObjects;
 using Utils;
@@ -77,5 +78,19 @@ namespace MyBoard
         /// <returns>A list of IDynamicObject</returns>
         List<IDynamicObject> GetAlive();
 
+        /// <summary>
+        /// Return a random position on the board
+        /// </summary>
+        /// <returns>A tuple of position</returns>
+        Tuple<int, int> GetRandomPosition();
+
+        /// <summary>
+        /// For testing purposes
+        /// </summary>
+        /// <param name="tiles"></param>
+        /// <param name="info"></param>
+        /// <param name="rnd"></param>
+        /// <param name="producerConsumer"></param>
+        void TestBoard(Tile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer);
     }
 }

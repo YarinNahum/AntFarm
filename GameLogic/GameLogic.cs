@@ -184,13 +184,13 @@ namespace MyGameLogic
             producerConsumer.Produce(String.Format("Object number {0} wants to move from position: {1},{2} to position {3},{4}", obj.Id, obj.X, obj.Y, x, y));
             
             //for printing purposes
-            int _x = obj.X;
-            int _y = obj.Y;
+            int localX = obj.X;
+            int localY = obj.Y;
 
             // try to move the object to the random position (x,y)
             bool result = board.TryToMove(obj, x, y);
             if (result)
-                producerConsumer.Produce(String.Format("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, _x, _y, x, y));
+                producerConsumer.Produce(String.Format("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, localX, localY, x, y));
         }
 
         public void Fight(IDynamicObject obj)
