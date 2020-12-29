@@ -9,7 +9,7 @@ using System.Threading;
 using DynamicObjects;
 using Utils;
 
-namespace MyBoard
+namespace BoardNamespace
 {
     public interface IBoard
     {
@@ -27,8 +27,8 @@ namespace MyBoard
         List<IDynamicObject> UpdateStatusAll();
 
         /// <summary>
-        /// Generate static objects on the board by amount specified in the Info class
-        /// See <see cref="Info"/>
+        /// Generate static objects on the board by at most the amount specified in the Info class
+        /// See <see cref="Info.FoodPerDay"/>
         /// </summary>
         void GenetareFood();
 

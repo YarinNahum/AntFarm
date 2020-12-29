@@ -6,16 +6,16 @@ using System.Threading;
 using System.Diagnostics;
 using Utils;
 using DynamicObjects;
-using MyBoard;
+using BoardNamespace;
 using ProducerConsumer;
 
-namespace MyGameLogic
+namespace GameLogicNameSpace
 {
     public class GameLogic : IGameLogic
     {
         #region variables
-        private readonly Info info;
-        private readonly Board board;
+        private IInfo info;
+        private IBoard board;
 
         // the number of finished tasks each day
         private static long finishedTasksOfTheDay = 0;
@@ -46,6 +46,12 @@ namespace MyGameLogic
             board = new Board(info.Length, info.Hight,producerConsumer);
         }
 
+        public void GameLogicTest(IInfo info, IBoard board)
+        {
+            this.info = info;
+            this.board = board;
+        }
+
         public void GenerateInitialObjects()
         {
             int count = info.NumberOfObjects;
@@ -60,7 +66,6 @@ namespace MyGameLogic
             {
                 ares.TryAdd(obj.Id, new AutoResetEvent(false));
                 Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
-
             }
             playing = true;
             // create a task for the purpose of creating additional dynamic object mid-run
@@ -79,7 +84,7 @@ namespace MyGameLogic
         
         public void WakeUp()
         {
-            var nonDeadObjects = board.UpdateStatusAll();
+            var nonDeadObjects = board.GetAlive();
             foreach (IDynamicObject obj in nonDeadObjects)
             {
                 //only wake up an object that is sleeping
@@ -101,41 +106,37 @@ namespace MyGameLogic
         public void StartNewDay()
         {
             finishedTasksOfTheDay = 0;
-            producerConsumer.Produce("Starting a new day!");
+            
 
             // start the clock for the day
             clock.Start();
 
-            // call Set() for each AutoResetEvent in the dictinory. 
-            foreach (AutoResetEvent are in ares.Values)
-            {
-                are.Set();
-            }
-
-            long numberOfAnts = ares.Count;
+            long numberOfAnts = ares.Count ;
 
             // call Set() for the AutoResetEvent that controls the task that creates new dynamic objects.
             creatorTaskARE.Set();
+
+            foreach (AutoResetEvent are in ares.Values)
+            // call Set() for each AutoResetEvent in the dictinory. 
+            {
+                are.Set();
+            }
 
             /// this while acts as a barrier. the main thread will pass this barrier only when all 
             /// the dynamic object's tasks will finish for the given day. 
             
             while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts)) { 
                 mainThreadARE.WaitOne();
-                numberOfAnts = ares.Count;
+                numberOfAnts = GetNumberOfAliveObjects();
             }
-
-
-            
-            producerConsumer.Produce("The day has ended!");
             // reset the clock
             clock.Reset();
         }
 
-        public int GetANumberOfAliveObjects()
+        public int GetNumberOfAliveObjects()
         {
-            List<IDynamicObject> l = board.GetAlive();
-            return l.Count;
+
+            return board.GetAlive().Count;
         }
 
         public void ActDepressedObject(IDynamicObject obj)

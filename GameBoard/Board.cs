@@ -6,7 +6,7 @@ using DynamicObjects;
 using StaticObjects;
 using ProducerConsumer;
 
-namespace MyBoard
+namespace BoardNamespace
 {
     public class Board : IBoard
     {
@@ -16,7 +16,7 @@ namespace MyBoard
         private RandomOption randomOption = RandomOption.RealTime;
         private IProducerConsumerMessages<string> producerConsumer;
 
-
+        //for testing purposes
         public Board() { }
         //for testing purposes
         public void TestBoard(ITile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer)

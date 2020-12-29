@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Configuration;
-using MyGameLogic;
+using GameLogicNameSpace;
 
 namespace Controller
 {
@@ -30,7 +30,7 @@ namespace Controller
             while (maxNumberOfDays > 0)
             {
                 maxNumberOfDays--;
-                int dynamicObjectCount = gameLogic.GetANumberOfAliveObjects();
+                int dynamicObjectCount = gameLogic.GetNumberOfAliveObjects();
                 if (dynamicObjectCount == 0)
                 {
                     gameLogic.ConsumeAllMessages();
@@ -39,10 +39,12 @@ namespace Controller
                     Console.ReadLine();
                     Environment.Exit(0);
                 }
-                gameLogic.WakeUp();
+                Console.WriteLine("Starting a new day!");
                 gameLogic.StartNewDay();
                 gameLogic.GenerateFood();
                 gameLogic.UpdateAlive();
+                gameLogic.WakeUp();
+                Console.WriteLine("The day has ended!");
             }
             gameLogic.ConsumeAllMessages();
             Console.WriteLine("All days have passed. Click enter to exit");

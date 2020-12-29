@@ -46,9 +46,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameLogic\MyGameLogic.csproj">
+    <ProjectReference Include="..\GameLogic\GameLogic.csproj">
       <Project>{cfda06f3-b60e-4f00-8864-225bd3205004}</Project>
-      <Name>MyGameLogic</Name>
+      <Name>GameLogic</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

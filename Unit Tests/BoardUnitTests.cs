@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyBoard;
+using BoardNamespace;
 using Utils;
 using Tiles;
 using DynamicObjects;

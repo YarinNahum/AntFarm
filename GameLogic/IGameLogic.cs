@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyBoard;
+using BoardNamespace;
 using Utils;
 using DynamicObjects;
 
 
-namespace MyGameLogic
+namespace GameLogicNameSpace
 {
     interface IGameLogic
     {
@@ -36,7 +36,7 @@ namespace MyGameLogic
         /// Returns the number of alive objects.
         /// </summary>
         /// <returns>A number of alive objects</returns>
-        int GetANumberOfAliveObjects();
+        int GetNumberOfAliveObjects();
 
         /// <summary>
         /// Decide how to act on a depressed dynamic object.
