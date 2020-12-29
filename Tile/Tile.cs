@@ -16,7 +16,7 @@ namespace Tiles
     /// <seealso cref="IStaticObject"/>
     /// <seealso cref="ReaderWriterLockSlim"/>
     /// </summary>
-    public class Tile
+    public class Tile : ITile
     {
         public IDynamicObject DynamicObject { get; set; }
         public IStaticObject StaticObject { get; set; }

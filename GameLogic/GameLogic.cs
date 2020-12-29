@@ -117,13 +117,14 @@ namespace MyGameLogic
             // call Set() for the AutoResetEvent that controls the task that creates new dynamic objects.
             creatorTaskARE.Set();
 
-            /// this do-while acts as a barrier. the main thread will pass this barrier only when all 
+            /// this while acts as a barrier. the main thread will pass this barrier only when all 
             /// the dynamic object's tasks will finish for the given day. 
-            do { 
+            
+            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts)) { 
                 mainThreadARE.WaitOne();
                 numberOfAnts = ares.Count;
             }
-            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts));
+
 
             
             producerConsumer.Produce("The day has ended!");

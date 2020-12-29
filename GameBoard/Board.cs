@@ -10,16 +10,16 @@ namespace MyBoard
 {
     public class Board : IBoard
     {
-        private  Tile[,] tiles;
-        private  IInfo info;
-        private  IRandomTest rnd;
-        private  RandomOption randomOption = RandomOption.RealTime;
-        private  IProducerConsumerMessages<string> producerConsumer;
+        private ITile[,] tiles;
+        private IInfo info;
+        private IRandomTest rnd;
+        private RandomOption randomOption = RandomOption.RealTime;
+        private IProducerConsumerMessages<string> producerConsumer;
 
 
         public Board() { }
         //for testing purposes
-        public void TestBoard(Tile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer)
+        public void TestBoard(ITile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer)
         {
             this.info = info;
             this.tiles = tiles;
@@ -65,30 +65,25 @@ namespace MyBoard
             var l = GetAlive();
             List<IDynamicObject> antsAlive = new List<IDynamicObject>();
 
-            /// for each object alive, we catch the lock at the same position in writemode,
-            /// and we calculate the strength of the object.
+            /// for each object alive we calculate the strength of the object.
             /// if the strength is 0 ore below, we set the state as State.Dead and we remove it from the tile.
             /// we return only the non-dead objects on the board.
             foreach (IDynamicObject obj in l)
             {
                 var tile = tiles[obj.X, obj.Y];
-                tile.Lock.EnterWriteLock();
-                try
+                obj.AddStrength(-info.ObjectStrengthDecay);
+                if (obj.Strength > 0)
                 {
-                    obj.AddStrength(-info.ObjectStrengthDecay);
-                    if (obj.Strength > 0)
-                    {
-                        obj.Age++;
-                        antsAlive.Add(obj);
-                    }
-                    else
-                    {
-                        producerConsumer.Produce(String.Format("Object number {0} died!", obj.Id));
-                        obj.SetState(State.Dead);
-                        tile.DynamicObject = null;
-                    }
+                    obj.Age++;
+                    antsAlive.Add(obj);
                 }
-                finally { tile.Lock.ExitWriteLock(); }
+                else
+                {
+                    producerConsumer.Produce(String.Format("Object number {0} died!", obj.Id));
+                    obj.SetState(State.Dead);
+                    tile.DynamicObject = null;
+                }
+
             }
             return antsAlive;
         }
@@ -151,8 +146,8 @@ namespace MyBoard
                 throw new ArgumentException("Trying to move outside of the board");
 
             // catch both the locks at (x,y) and the object position in upgradable mode.
-            Tile tileToMove = tiles[x, y];
-            Tile myTile = tiles[obj.X, obj.Y];
+            ITile tileToMove = tiles[x, y];
+            ITile myTile = tiles[obj.X, obj.Y];
             myTile.Lock.EnterUpgradeableReadLock();
             tileToMove.Lock.EnterUpgradeableReadLock();
             try
@@ -227,7 +222,7 @@ namespace MyBoard
             if (x >= info.Length || x < 0 || y >= info.Hight || y < 0)
                 throw new ArgumentException("Trying to move outside of the board");
 
-            Tile tile = tiles[x, y];
+            ITile tile = tiles[x, y];
 
             //catch the lock at (x,y) with upgradable mode
             tile.Lock.EnterUpgradeableReadLock();
@@ -247,7 +242,7 @@ namespace MyBoard
                         try
                         {
                             // creates a new and and return it.
-                            IDynamicObject newAnt = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y , ProducerConsumer = producerConsumer};
+                            IDynamicObject newAnt = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
                             producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, newAnt.Id));
                             tile.DynamicObject = newAnt;
                             return newAnt;
@@ -274,25 +269,16 @@ namespace MyBoard
             for (int i = 0; i < info.Length; i++)
                 for (int j = 0; j < info.Hight; j++)
                 {
-                    // catch the lock at (i,j) with read mode
-                    tiles[i, j].Lock.EnterReadLock();
-                    try
-                    {
-                        // if there is a dymanic object at (i,j), and it's not dead than add it to the list.
-                        if (tiles[i, j].DynamicObject != null && tiles[i, j].DynamicObject.State != State.Dead)
-                            l.Add(tiles[i, j].DynamicObject);
-                    }
-                    finally
-                    {
-                        tiles[i, j].Lock.ExitReadLock();
-                    }
+                    // if there is a dymanic object at (i,j), and it's not dead than add it to the list.
+                    if (tiles[i, j].DynamicObject != null && tiles[i, j].DynamicObject.State != State.Dead)
+                        l.Add(tiles[i, j].DynamicObject);
                 }
             return l;
         }
 
-        public Tuple<int,int> GetRandomPosition()
+        public Tuple<int, int> GetRandomPosition()
         {
-            int x=0, y=0;
+            int x = 0, y = 0;
             switch (randomOption)
             {
                 case RandomOption.RealTime:

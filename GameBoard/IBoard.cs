@@ -91,6 +91,6 @@ namespace MyBoard
         /// <param name="info"></param>
         /// <param name="rnd"></param>
         /// <param name="producerConsumer"></param>
-        void TestBoard(Tile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer);
+        void TestBoard(ITile[,] tiles, IInfo info, IRandomTest rnd, IProducerConsumerMessages<string> producerConsumer);
     }
 }
