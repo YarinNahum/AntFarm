@@ -32,7 +32,12 @@ namespace GameLogicNameSpace
         private readonly AutoResetEvent creatorTaskARE;
         bool playing;
 
+        //producer-consumer for the prints in the console
         private readonly IProducerConsumerMessages<string> producerConsumer;
+
+        //for testing purposes
+        private RandomOption randomOption = RandomOption.RealTime;
+        private IRandomTest rnd;
         #endregion
 
         public GameLogic()
@@ -43,13 +48,15 @@ namespace GameLogicNameSpace
             mainThreadARE = new AutoResetEvent(false);
             creatorTaskARE = new AutoResetEvent(false);
             producerConsumer = new ProducerConsumerMessages();
-            board = new Board(info.Length, info.Hight,producerConsumer);
+            board = new Board(info.Length, info.Hight, producerConsumer);
         }
 
-        public void GameLogicTest(IInfo info, IBoard board)
+        public void GameLogicTest(IInfo info, IBoard board, IRandomTest rnd)
         {
             this.info = info;
             this.board = board;
+            this.rnd = rnd;
+            randomOption = RandomOption.Testing;
         }
 
         public void GenerateInitialObjects()
@@ -81,7 +88,7 @@ namespace GameLogicNameSpace
             });
 
         }
-        
+
         public void WakeUp()
         {
             var nonDeadObjects = board.GetAlive();
@@ -106,12 +113,12 @@ namespace GameLogicNameSpace
         public void StartNewDay()
         {
             finishedTasksOfTheDay = 0;
-            
+
 
             // start the clock for the day
             clock.Start();
 
-            long numberOfAnts = ares.Count ;
+            long numberOfAnts = ares.Count;
 
             // call Set() for the AutoResetEvent that controls the task that creates new dynamic objects.
             creatorTaskARE.Set();
@@ -124,8 +131,9 @@ namespace GameLogicNameSpace
 
             /// this while acts as a barrier. the main thread will pass this barrier only when all 
             /// the dynamic object's tasks will finish for the given day. 
-            
-            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts)) { 
+
+            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts))
+            {
                 mainThreadARE.WaitOne();
                 numberOfAnts = GetNumberOfAliveObjects();
             }
@@ -176,15 +184,24 @@ namespace GameLogicNameSpace
         public void Move(IDynamicObject obj)
         {
             // get a random position near the object position
-            int x, y;
+            int x = 0, y = 0;
             do
             {
-                x = MyRandom.Next(Math.Max(0, obj.X - 1), Math.Min(info.Length, obj.X + 2));
-                y = MyRandom.Next(Math.Max(0, obj.Y - 1), Math.Min(info.Hight, obj.Y + 2));
+                switch (randomOption)
+                {
+                    case RandomOption.RealTime:
+                        x = MyRandom.Next(Math.Max(0, obj.X - 1), Math.Min(info.Length, obj.X + 2));
+                        y = MyRandom.Next(Math.Max(0, obj.Y - 1), Math.Min(info.Hight, obj.Y + 2));
+                        break;
+                    case RandomOption.Testing:
+                        x = rnd.Next(Math.Max(0, obj.X - 1), Math.Min(info.Length, obj.X + 2));
+                        y = rnd.Next(Math.Max(0, obj.Y - 1), Math.Min(info.Hight, obj.Y + 2));
+                        break;
+                }
             } while (x == obj.X && y == obj.Y);
 
             producerConsumer.Produce(String.Format("Object number {0} wants to move from position: {1},{2} to position {3},{4}", obj.Id, obj.X, obj.Y, x, y));
-            
+
             //for printing purposes
             int localX = obj.X;
             int localY = obj.Y;
@@ -198,15 +215,24 @@ namespace GameLogicNameSpace
         public void Fight(IDynamicObject obj)
         {
             producerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", obj.Id));
-            
+
             // get all objects near the given object
             var dynamicObjects = board.GetNearObjects(obj.X, obj.Y);
 
             if (dynamicObjects.Count == 0)
                 return;
-            
+
             // fight a random object
-            int index = MyRandom.Next(0, dynamicObjects.Count);
+            int index = 0;
+            switch (randomOption)
+            {
+                case RandomOption.RealTime:
+                    index = MyRandom.Next(0, dynamicObjects.Count);
+                    break;
+                case RandomOption.Testing:
+                    index = rnd.Next(0, dynamicObjects.Count);
+                    break;
+            }
             obj.Fight(dynamicObjects[index]);
         }
 
@@ -259,7 +285,7 @@ namespace GameLogicNameSpace
             // get a random position on the board
             int x = MyRandom.Next(0, info.Length);
             int y = MyRandom.Next(0, info.Hight);
-            
+
             //try to create an object at position (x,y)
             IDynamicObject obj = board.TryCreate(x, y);
             if (obj != null)
@@ -267,7 +293,7 @@ namespace GameLogicNameSpace
                 /// if an object was created, add a new enrty in the dictinory and create 
                 /// a new task for the dynamic object
                 AutoResetEvent are = new AutoResetEvent(false);
-                are.Set(); 
+                are.Set();
                 ares.TryAdd(obj.Id, are);
                 Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
             }

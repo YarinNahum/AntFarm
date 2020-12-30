@@ -10,7 +10,7 @@ using DynamicObjects;
 
 namespace GameLogicNameSpace
 {
-    interface IGameLogic
+    public interface IGameLogic
     {
         /// <summary>
         /// Generate initial objects on the board.
@@ -86,6 +86,19 @@ namespace GameLogicNameSpace
         /// Generate food 
         /// </summary>
         void GenerateFood();
+
+        /// <summary>
+        /// Consume all the messages that are in the queue.
+        /// See <see cref="ProducerConsumer.IProducerConsumerMessages{string}"/>
+        /// </summary>
+        void ConsumeAllMessages();
+
+        /// <summary>
+        /// for testing purposes
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="board"></param>
+        void GameLogicTest(IInfo info, IBoard board, IRandomTest rnd);
 
     }
 }

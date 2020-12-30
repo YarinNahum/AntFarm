@@ -20,7 +20,8 @@ namespace ProducerConsumer
         void ConsumeAll();
 
         /// <summary>
-        /// Consume a single message
+        /// Will try to consume all the messages in the queue. 
+        /// blocks the thread when the queue is empty
         /// </summary>
         void Consume();
     }

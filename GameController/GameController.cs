@@ -15,7 +15,7 @@ namespace Controller
     public class GameController
     {
         private int maxNumberOfDays;
-        private GameLogic gameLogic;
+        private IGameLogic gameLogic;
         public GameController()
         {
             maxNumberOfDays = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MaxNumberOfDays"));
