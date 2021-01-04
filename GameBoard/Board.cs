@@ -59,33 +59,10 @@ namespace BoardNamespace
             return l;
         }
 
-        public List<IDynamicObject> UpdateStatusAll()
+        public void SetTileObject(IDynamicObject obj, int x , int y)
         {
-            // get all the alive objects.
-            var l = GetAlive();
-            List<IDynamicObject> antsAlive = new List<IDynamicObject>();
-
-            /// for each object alive we calculate the strength of the object.
-            /// if the strength is 0 ore below, we set the state as State.Dead and we remove it from the tile.
-            /// we return only the non-dead objects on the board.
-            foreach (IDynamicObject obj in l)
-            {
-                var tile = tiles[obj.X, obj.Y];
-                obj.AddStrength(-info.ObjectStrengthDecay);
-                if (obj.Strength > 0)
-                {
-                    obj.Age++;
-                    antsAlive.Add(obj);
-                }
-                else
-                {
-                    producerConsumer.Produce(String.Format("Object number {0} died!", obj.Id));
-                    obj.SetState(State.Dead);
-                    tile.DynamicObject = null;
-                }
-
-            }
-            return antsAlive;
+            ITile t = tiles[x, y];
+            t.DynamicObject = obj;
         }
 
         public void GenetareFood()

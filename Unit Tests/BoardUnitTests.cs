@@ -166,60 +166,7 @@ namespace Unit_Tests
             A.CallTo(() => obj.SetState(State.Depressed)).MustHaveHappened();
         }
 
-        [TestMethod]
-
-        public void Test_UpdateStatusAll()
-        {
-            IInfo info = A.Fake<IInfo>();
-            IRandomTest rnd = A.Fake<IRandomTest>();
-            IProducerConsumerMessages<string> producerConsumer = A.Fake<IProducerConsumerMessages<string>>();
-
-            int[] values = new int[50];
-            ITile[,] tiles = new ITile[3, 3];
-
-            for (int i = 0; i < 3; i++)
-                for (int j = 0; j < 3; j++)
-                {
-                    ITile tile = A.Fake<ITile>();
-                    tiles[i, j] = tile;
-                }
-
-
-            var positions = new List<(int, int)> { (0, 0), (1, 0), (2, 1) };
-            foreach (var t in positions)
-            {
-                int x = t.Item1;
-                int y = t.Item2;
-                IDynamicObject fakeObj = A.Fake<IDynamicObject>();
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
-                A.CallTo(() => fakeObj.Strength).Returns(2);
-                A.CallTo(() => tiles[x, y].DynamicObject).ReturnsLazily(()=>fakeObj);
-            }
-
-            var obj = A.Fake<IDynamicObject>();
-            int strength = 1;
-            A.CallTo(() => obj.Strength).ReturnsLazily(()=>strength);
-            A.CallTo(() => obj.X).Returns(2);
-            A.CallTo(() => obj.Y).Returns(2);
-            A.CallTo(() => tiles[2, 2].DynamicObject).ReturnsLazily(() => obj);
-            A.CallTo(() => obj.AddStrength(-1)).Invokes(() => strength--);
-
-
-            A.CallTo(() => info.Length).Returns(3);
-            A.CallTo(() => info.Hight).Returns(3);
-            A.CallTo(() => info.ObjectStrengthDecay).Returns(1);
-
-
-            IBoard board = new Board();
-            board.TestBoard(tiles, info, rnd, producerConsumer);
-
-            var l = board.UpdateStatusAll();
-
-            Assert.AreEqual(3, l.Count);
-            A.CallTo(() => obj.SetState(State.Dead)).MustHaveHappened();
-        }
-
+        
         [TestMethod]
 
         public void Test_GetNearObjects()

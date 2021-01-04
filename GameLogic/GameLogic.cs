@@ -102,7 +102,28 @@ namespace GameLogicNameSpace
 
         public void UpdateAlive()
         {
-            board.UpdateStatusAll();
+            var l = board.GetAlive();
+
+            /// for each object alive we calculate the strength of the object.
+            /// if the strength is 0 ore below, we set the state as State.Dead and we remove it from the tile.
+            /// we return only the non-dead objects on the board.
+            foreach (IDynamicObject obj in l)
+            {
+                
+                obj.AddStrength(-info.ObjectStrengthDecay);
+                if (obj.Strength > 0)
+                {
+                    obj.Age++;
+                }
+                else
+                {
+                    producerConsumer.Produce(String.Format("Object number {0} died!", obj.Id));
+                    obj.SetState(State.Dead);
+                    board.SetTileObject(null, obj.X, obj.Y);
+                }
+
+            }
+
         }
 
         public void GenerateFood()

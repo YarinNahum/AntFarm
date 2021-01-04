@@ -21,10 +21,10 @@ namespace BoardNamespace
         List<IDynamicObject> GenerateInitialObjects(int count);
 
         /// <summary>
-        /// Update all the objects that are currently on the board, and return all the alive objects.
+        /// Set the dynamic object in position (x,y) with obj
         /// </summary>
-        /// <returns >The list of all the alive objects on the board</returns>
-        List<IDynamicObject> UpdateStatusAll();
+        /// <returns ></returns>
+        void SetTileObject(IDynamicObject obj, int x, int y);
 
         /// <summary>
         /// Generate static objects on the board by at most the amount specified in the Info class
