@@ -25,7 +25,7 @@ namespace DynamicObjects
             State = State.Alive;
             this.Id = id;
             Age = 0;
-            SleepCount = 1;
+            SleepCount = 0;
             Strength = lowStrength == highStrength? lowStrength : MyRandom.Next(lowStrength, highStrength + 1);
         }
 
@@ -38,8 +38,8 @@ namespace DynamicObjects
                 // the loser is now depressed
                 loser.SetState(State.Depressed);
 
-                ProducerConsumer.Produce(String.Format("Object number {0} won agains object number {1}\nWinner position: {2},{3}\nLoser Position {4},{5}",
-                    winner.Id,loser.Id, winner.X,winner.Y,loser.X,loser.Y)); 
+                ProducerConsumer.Produce(String.Format("Object number {0} won agains object number {1}",
+                    winner.Id,loser.Id)); 
             }
             /// the winner of the fight is the object with more strength. if the strengths of objects are the same
             /// than there is no winner

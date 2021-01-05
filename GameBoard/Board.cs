@@ -15,6 +15,7 @@ namespace BoardNamespace
         private IRandomTest rnd;
         private RandomOption randomOption = RandomOption.RealTime;
         private IProducerConsumerMessages<string> producerConsumer;
+        private Dictionary<int, IDynamicObject> aliveObjects;
 
         //for testing purposes
         public Board() { }
@@ -26,6 +27,7 @@ namespace BoardNamespace
             this.rnd = rnd;
             randomOption = RandomOption.Testing;
             this.producerConsumer = producerConsumer;
+            
         }
 
 
@@ -34,6 +36,7 @@ namespace BoardNamespace
             info = Info.Instance;
             this.producerConsumer = producerConsumer;
             tiles = new Tile[length, hight];
+            aliveObjects = new Dictionary<int, IDynamicObject>();
             for (int i = 0; i < length; i++)
                 for (int j = 0; j < hight; j++)
                     tiles[i, j] = new Tile();
@@ -50,9 +53,11 @@ namespace BoardNamespace
                 // create a IDynamicObject at (x,y) if there isn't one already.
                 if (tiles[x, y].DynamicObject == null)
                 {
-                    IDynamicObject ant = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
+                    int id = info.ID;
+                    IDynamicObject ant = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
                     tiles[x, y].DynamicObject = ant;
                     count--;
+                    aliveObjects.Add(id, ant);
                     l.Add(ant);
                 }
             }
@@ -107,6 +112,7 @@ namespace BoardNamespace
                         tiles[i, j].Lock.ExitReadLock();
                     }
                 }
+
             /// if the count is not in the boundries given by the <see cref="Info"/> class,
             /// the object's state will become <see cref="State.Depressed"/>.
             if ((count < info.MinObjectsPerArea || count > info.MaxObjectsPerArea) && obj.State == State.Alive)
@@ -219,9 +225,11 @@ namespace BoardNamespace
                         try
                         {
                             // creates a new and and return it.
-                            IDynamicObject newAnt = new Ant(info.ID, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
+                            int id = info.ID;
+                            IDynamicObject newAnt = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
                             producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, newAnt.Id));
                             tile.DynamicObject = newAnt;
+                            aliveObjects.Add(id, newAnt);
                             return newAnt;
                         }
                         finally { tile.Lock.ExitWriteLock(); }
@@ -240,17 +248,17 @@ namespace BoardNamespace
         public List<IDynamicObject> GetAlive()
         {
 
-            List<IDynamicObject> l = new List<IDynamicObject>();
+            return new List<IDynamicObject>(aliveObjects.Values);
+        }
 
-            // loop around the board
-            for (int i = 0; i < info.Length; i++)
-                for (int j = 0; j < info.Hight; j++)
-                {
-                    // if there is a dymanic object at (i,j), and it's not dead than add it to the list.
-                    if (tiles[i, j].DynamicObject != null && tiles[i, j].DynamicObject.State != State.Dead)
-                        l.Add(tiles[i, j].DynamicObject);
-                }
-            return l;
+        public void SetAlive(List<IDynamicObject> alive)
+        {
+            var dict = new Dictionary<int, IDynamicObject>();
+            foreach (var obj in alive)
+            {
+                dict.Add(obj.Id, obj);
+            }
+            aliveObjects = dict;
         }
 
         public Tuple<int, int> GetRandomPosition()

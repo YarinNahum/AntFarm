@@ -12,7 +12,7 @@ namespace AntFarm
 
     class AntFarm
     {
-        static void Main(string[] args)
+        static void Main()
         {
             GameController gameController = new GameController();
             gameController.StartGame();

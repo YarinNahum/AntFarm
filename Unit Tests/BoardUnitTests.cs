@@ -145,7 +145,7 @@ namespace Unit_Tests
                 int y = t.Item2;
                 IDynamicObject fakeObj = A.Fake<IDynamicObject>();
                 A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
+                A.CallTo(() => fakeObj.Y).ReturnsLazily(() => y);
                 tiles[x, y].DynamicObject = fakeObj;
             }
 
@@ -196,7 +196,7 @@ namespace Unit_Tests
                 int y = t.Item2;
                 IDynamicObject fakeObj = A.Fake<IDynamicObject>();
                 A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
+                A.CallTo(() => fakeObj.Y).ReturnsLazily(() => y);
                 A.CallTo(() => fakeObj.Strength).Returns(2);
                 A.CallTo(() => tiles[x, y].DynamicObject).ReturnsLazily(() => fakeObj);
             }
@@ -259,7 +259,7 @@ namespace Unit_Tests
                 int y = t.Item2;
                 IDynamicObject fakeObj = A.Fake<IDynamicObject>();
                 A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
+                A.CallTo(() => fakeObj.Y).ReturnsLazily(() => y);
                 A.CallTo(() => fakeObj.Strength).Returns(2);
                 A.CallTo(() => tiles[x, y].DynamicObject).ReturnsLazily(() => fakeObj);
             }
@@ -313,7 +313,7 @@ namespace Unit_Tests
                 int y = t.Item2;
                 IDynamicObject fakeObj = A.Fake<IDynamicObject>();
                 A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
+                A.CallTo(() => fakeObj.Y).ReturnsLazily(() => y);
                 A.CallTo(() => fakeObj.Strength).Returns(2);
                 A.CallTo(() => tiles[x, y].DynamicObject).ReturnsLazily(() => fakeObj);
             }
@@ -360,7 +360,7 @@ namespace Unit_Tests
                 int y = t.Item2;
                 IDynamicObject fakeObj = A.Fake<IDynamicObject>();
                 A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
+                A.CallTo(() => fakeObj.Y).ReturnsLazily(() => y);
                 A.CallTo(() => tiles[x, y].DynamicObject).ReturnsLazily(() => fakeObj);
                 A.CallTo(() => tiles[x, y].StaticObject).Returns(null);
             }
@@ -414,7 +414,7 @@ namespace Unit_Tests
                 int y = t.Item2;
                 IDynamicObject fakeObj = A.Fake<IDynamicObject>();
                 A.CallTo(() => fakeObj.X).ReturnsLazily(() => x);
-                A.CallTo(() => fakeObj.X).ReturnsLazily(() => y);
+                A.CallTo(() => fakeObj.Y).ReturnsLazily(() => y);
                 A.CallTo(() => tiles[x, y].DynamicObject).ReturnsLazily(() => fakeObj);
                 A.CallTo(() => tiles[x, y].StaticObject).Returns(null);
             }

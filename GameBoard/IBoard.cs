@@ -11,7 +11,7 @@ using Utils;
 
 namespace BoardNamespace
 {
-    public interface IBoard
+    public interface IBoard 
     {
         /// <summary>
         /// Generates dynamic objects on the board.
@@ -77,6 +77,12 @@ namespace BoardNamespace
         /// </summary>
         /// <returns>A list of IDynamicObject</returns>
         List<IDynamicObject> GetAlive();
+
+        /// <summary>
+        /// Set the alive objects
+        /// </summary>
+        /// <param name="alive">A list of non-dead objects</param>
+        void SetAlive(List<IDynamicObject> alive);
 
         /// <summary>
         /// Return a random position on the board

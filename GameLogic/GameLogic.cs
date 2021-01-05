@@ -66,10 +66,10 @@ namespace GameLogicNameSpace
                 throw new ArgumentException(String.Format("The number of objects to create {0} is bigger than the size of the board {1}", count, info.Length * info.Hight));
 
             // generate the initial objects
-            var nonDeadObjects = board.GenerateInitialObjects(count);
+            var generatedInitial = board.GenerateInitialObjects(count);
 
             // create a task for each object, and add a new AutoResetEvent to the dictinory associated with the object id.
-            foreach (IDynamicObject obj in nonDeadObjects)
+            foreach (IDynamicObject obj in generatedInitial)
             {
                 ares.TryAdd(obj.Id, new AutoResetEvent(false));
                 Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
@@ -104,6 +104,7 @@ namespace GameLogicNameSpace
         {
             var l = board.GetAlive();
 
+            var alive = new List<IDynamicObject>();
             /// for each object alive we calculate the strength of the object.
             /// if the strength is 0 ore below, we set the state as State.Dead and we remove it from the tile.
             /// we return only the non-dead objects on the board.
@@ -114,6 +115,7 @@ namespace GameLogicNameSpace
                 if (obj.Strength > 0)
                 {
                     obj.Age++;
+                    alive.Add(obj);
                 }
                 else
                 {
@@ -123,6 +125,7 @@ namespace GameLogicNameSpace
                 }
 
             }
+            board.SetAlive(alive);
 
         }
 
@@ -197,7 +200,6 @@ namespace GameLogicNameSpace
             }
             else if (action.Equals("Fight"))
             {
-                producerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", obj.Id));
                 Fight(obj);
             }
         }
