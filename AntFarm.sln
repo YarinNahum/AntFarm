@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "GameController\GameController.csproj", "{1E752FEE-6DD7-45B0-9F99-9F3797B11D6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Objects", "Interfaces\Objects.csproj", "{D612BA38-ED0D-4B28-9266-2AA2463C6A21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicObjects", "Interfaces\DynamicObjects.csproj", "{D612BA38-ED0D-4B28-9266-2AA2463C6A21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiles", "Tile\Tiles.csproj", "{F6A6CFF8-740C-4AAB-BEE2-03899DEE9177}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProducerConsumer", "ProducerConsumer\ProducerConsumer.csproj", "{64405C3F-CD38-42FD-AA97-F45352303F0B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicUnitTests", "Unit Tests\GameLogicUnitTests\GameLogicUnitTests.csproj", "{A501AF7B-A285-4958-9AEE-CE5731D42799}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "BoardInterfaceForObjects\Interfaces.csproj", "{FB09EDD7-4F80-4E19-8CC0-C44E96BC9C76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{A501AF7B-A285-4958-9AEE-CE5731D42799}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A501AF7B-A285-4958-9AEE-CE5731D42799}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A501AF7B-A285-4958-9AEE-CE5731D42799}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB09EDD7-4F80-4E19-8CC0-C44E96BC9C76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB09EDD7-4F80-4E19-8CC0-C44E96BC9C76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB09EDD7-4F80-4E19-8CC0-C44E96BC9C76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB09EDD7-4F80-4E19-8CC0-C44E96BC9C76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

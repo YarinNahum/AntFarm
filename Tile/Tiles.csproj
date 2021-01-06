@@ -46,9 +46,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Interfaces\Objects.csproj">
+    <ProjectReference Include="..\BoardInterfaceForObjects\Interfaces.csproj">
+      <Project>{fb09edd7-4f80-4e19-8cc0-c44e96bc9c76}</Project>
+      <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\DynamicObjects.csproj">
       <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
-      <Name>Objects</Name>
+      <Name>DynamicObjects</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

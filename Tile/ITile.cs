@@ -1,4 +1,4 @@
-﻿using DynamicObjects;
+﻿using IDynamicObjects;
 using StaticObjects;
 using System.Threading;
 

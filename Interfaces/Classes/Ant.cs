@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StaticObjects;
+using IDynamicObjects;
 using Utils;
 
 
@@ -19,6 +20,7 @@ namespace DynamicObjects
             State = State.Alive;
             Age = 0;
             Strength = 3;
+            Agility = 1;
         }
         public Ant(int id, int lowStrength, int highStrength)
         {
@@ -27,6 +29,7 @@ namespace DynamicObjects
             Age = 0;
             SleepCount = 0;
             Strength = lowStrength == highStrength? lowStrength : MyRandom.Next(lowStrength, highStrength + 1);
+            Agility = 1;
         }
 
         public override void Fight(IDynamicObject other)
@@ -53,6 +56,58 @@ namespace DynamicObjects
         {
             ProducerConsumer.Produce(String.Format("Ant number {0} ate food!", Id));
             Strength += 2;
+        }
+
+        public override void TryToMove()
+        {
+            int x , y;
+            do
+            {
+                x = MyRandom.Next(Math.Max(0, X - 1), Math.Min(info.Length, X + 2));
+                y = MyRandom.Next(Math.Max(0, Y - 1), Math.Min(info.Hight, Y + 2));
+            } while (x == X && y == Y);
+
+            ProducerConsumer.Produce(String.Format("Object number {0} wants to move from position: {1},{2} to position {3},{4}", Id, X, Y, x, y));
+
+            //for printing purposes
+            int localX = X;
+            int localY = Y;
+
+            // try to move the object to the random position (x,y)
+            bool result = BoardFunctions.TryToMove(X,Y,x, y);
+            if (result)
+                ProducerConsumer.Produce(String.Format("Object number {0} moved from {1},{2} to {3},{4}", Id, localX, localY, x, y));
+        }
+
+        public override void ActAliveObject()
+        {
+            // decide what action to perform
+            string action = DecideAction();
+            if (action.Equals("Move"))
+            {
+                TryToMove();
+            }
+            else if (action.Equals("Fight"))
+            {
+                TryToFight();
+            }
+        }
+
+        public override void ActDepressedObject()
+        {
+            var dynamicObjects = BoardFunctions.GetNearObjects(X, Y);
+
+            /// if the number of adjacent objects are in the range of [info.MinObjectsPerArea,info.MaxObjectsPerArea]
+            /// than the given object will no longer be depressed.
+            if (dynamicObjects.Count >= info.MinObjectsPerArea && dynamicObjects.Count <= info.MaxObjectsPerArea)
+            {
+                ProducerConsumer.Produce(String.Format("Object number {0} is no longer depressed, found {1} objects near it", Id, dynamicObjects.Count));
+                SetState(State.Alive);
+            }
+            else
+            {
+                ProducerConsumer.Produce(String.Format("Object number {0} is still depressed, found {1} objects near it", Id, dynamicObjects.Count));
+            }
         }
     }
 }

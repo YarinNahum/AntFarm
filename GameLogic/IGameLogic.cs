@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BoardNamespace;
 using Utils;
-using DynamicObjects;
+using IDynamicObjects;
 
 
 namespace GameLogicNameSpace
@@ -38,40 +38,6 @@ namespace GameLogicNameSpace
         /// <returns>A number of alive objects</returns>
         int GetNumberOfAliveObjects();
 
-        /// <summary>
-        /// Decide how to act on a depressed dynamic object.
-        /// See <see cref="State"/>
-        /// <seealso cref="Info.MinObjectsPerArea"/>
-        /// <seealso cref="Info.MaxObjectsPerArea"/>
-        /// </summary>
-        /// <param name="obj">The dynamic object that is depressed</param>
-        void ActDepressedObject(IDynamicObject obj);
-
-        /// <summary>
-        /// /// Decide how to act on a Alive and non depressed dynamic object.
-        /// See <see cref="State"/>
-        /// <seealso cref="IDynamicObject.DecideAction"/>
-        /// 
-        /// </summary>
-        /// <param name="obj">The dynamic object that is depressed</param>
-        /// </summary>
-        /// <param name="obj"></param>
-        void ActAliveObject(IDynamicObject obj);
-
-        /// <summary>
-        /// Try to move an object on the board
-        /// See <see cref="IBoard"/>
-        /// <seealso cref="MyRandom"/>
-        /// </summary>
-        /// <param name="obj">The object trying to move</param>
-        void Move(IDynamicObject obj);
-
-        /// <summary>
-        /// The given object argument trying to fight other dynamic object on the board.
-        /// See <see cref="IDynamicObject.Fight(IDynamicObject other)"/>
-        /// </summary>
-        /// <param name="obj">The object that is trying to fight</param>
-        void Fight(IDynamicObject obj);
 
         /// <summary>
         /// Decide how to act when a new day is started. It will create a new task for each alive object

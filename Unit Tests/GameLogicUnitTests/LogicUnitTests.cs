@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using FakeItEasy;
 using GameLogicNameSpace;
-using DynamicObjects;
+using IDynamicObjects;
 using Tiles;
 using Utils;
 using BoardNamespace;
@@ -103,7 +103,7 @@ namespace GameLogicUnitTests
             A.CallTo(() => info.MinObjectsPerArea).Returns(2);
 
             //act
-            gameLogic.ActDepressedObject(dynamicObject);
+            //gameLogic.ActDepressedObject(dynamicObject);
             //assert
             A.CallTo(() => dynamicObject.SetState(State.Alive)).MustHaveHappened();
         }
@@ -127,9 +127,9 @@ namespace GameLogicUnitTests
             A.CallTo(() => dynamicObject.Y).Returns(1);
             A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(0);
 
-            gameLogic.ActAliveObject(dynamicObject);
+            //gameLogic.ActAliveObject(dynamicObject);
 
-            A.CallTo(() => board.TryToMove(dynamicObject, 0, 0)).MustHaveHappened();
+            A.CallTo(() => board.TryToMove(dynamicObject.X, dynamicObject.Y, 0, 0)).MustHaveHappened();
 
         }
 
@@ -162,68 +162,11 @@ namespace GameLogicUnitTests
             A.CallTo(() => dynamicObject.Y).Returns(1);
             A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(0);
 
-            gameLogic.ActAliveObject(dynamicObject);
+            //gameLogic.ActAliveObject(dynamicObject);
 
             A.CallTo(() => dynamicObject.Fight(l[0])).MustHaveHappened();
         }
 
-        [TestMethod]
-
-        public void Test_Move()
-        {
-            IInfo info = A.Fake<IInfo>();
-            IBoard board = A.Fake<IBoard>();
-            IRandomTest rnd = A.Fake<IRandomTest>();
-
-            GameLogic gameLogic = new GameLogic();
-            gameLogic.GameLogicTest(info, board, rnd);
-
-
-
-            var dynamicObject = A.Fake<IDynamicObject>();
-
-            A.CallTo(() => dynamicObject.X).Returns(1);
-            A.CallTo(() => dynamicObject.Y).Returns(1);
-            A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(0);
-
-            gameLogic.Move(dynamicObject);
-
-            A.CallTo(() => board.TryToMove(dynamicObject,0,0)).MustHaveHappened();
-
-        }
-
-        [TestMethod]
-        public void Test_Fight()
-        {
-            IInfo info = A.Fake<IInfo>();
-            IBoard board = A.Fake<IBoard>();
-            IRandomTest rnd = A.Fake<IRandomTest>();
-
-            GameLogic gameLogic = new GameLogic();
-            gameLogic.GameLogicTest(info, board, rnd);
-
-            List<IDynamicObject> l = new List<IDynamicObject>();
-
-            int count = 3;
-            for (int i = 0; i < count; i++)
-            {
-                var obj = A.Fake<IDynamicObject>();
-                
-                l.Add(obj);
-            }
-            var dynamicObject = A.Fake<IDynamicObject>();
-
-            A.CallTo(() => dynamicObject.X).Returns(1);
-            A.CallTo(() => dynamicObject.Y).Returns(1);
-            A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(0);
-
-            A.CallTo(() => board.GetNearObjects(1, 1)).ReturnsLazily(() => l);
-
-            gameLogic.Fight(dynamicObject);
-
-            A.CallTo(() => dynamicObject.Fight(l[0])).MustHaveHappened();
-
-        }
 
         [TestMethod]
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
 using Utils;
-using DynamicObjects;
+using IDynamicObjects;
 using BoardNamespace;
 using ProducerConsumer;
 
@@ -121,7 +121,7 @@ namespace GameLogicNameSpace
                 {
                     producerConsumer.Produce(String.Format("Object number {0} died!", obj.Id));
                     obj.SetState(State.Dead);
-                    board.SetTileObject(null, obj.X, obj.Y);
+                    board.ClearDynamicObjectOnTile(obj.X, obj.Y);
                 }
 
             }
@@ -171,93 +171,6 @@ namespace GameLogicNameSpace
             return board.GetAlive().Count;
         }
 
-        public void ActDepressedObject(IDynamicObject obj)
-        {
-            // get the list of all the dynamic objects near the given object
-            var dynamicObjects = board.GetNearObjects(obj.X, obj.Y);
-
-            /// if the number of adjacent objects are in the range of [info.MinObjectsPerArea,info.MaxObjectsPerArea]
-            /// than the given object will no longer be depressed.
-            if (dynamicObjects.Count >= info.MinObjectsPerArea && dynamicObjects.Count <= info.MaxObjectsPerArea)
-            {
-                producerConsumer.Produce(String.Format("Object number {0} is no longer depressed, found {1} objects near it", obj.Id, dynamicObjects.Count));
-                obj.SetState(State.Alive);
-            }
-            else
-            {
-                producerConsumer.Produce(String.Format("Object number {0} is still depressed, found {1} objects near it", obj.Id, dynamicObjects.Count));
-            }
-        }
-
-
-        public void ActAliveObject(IDynamicObject obj)
-        {
-            // decide what action to perform
-            string action = obj.DecideAction();
-            if (action.Equals("Move"))
-            {
-                Move(obj);
-            }
-            else if (action.Equals("Fight"))
-            {
-                Fight(obj);
-            }
-        }
-
-        public void Move(IDynamicObject obj)
-        {
-            // get a random position near the object position
-            int x = 0, y = 0;
-            do
-            {
-                switch (randomOption)
-                {
-                    case RandomOption.RealTime:
-                        x = MyRandom.Next(Math.Max(0, obj.X - 1), Math.Min(info.Length, obj.X + 2));
-                        y = MyRandom.Next(Math.Max(0, obj.Y - 1), Math.Min(info.Hight, obj.Y + 2));
-                        break;
-                    case RandomOption.Testing:
-                        x = rnd.Next(Math.Max(0, obj.X - 1), Math.Min(info.Length, obj.X + 2));
-                        y = rnd.Next(Math.Max(0, obj.Y - 1), Math.Min(info.Hight, obj.Y + 2));
-                        break;
-                }
-            } while (x == obj.X && y == obj.Y);
-
-            producerConsumer.Produce(String.Format("Object number {0} wants to move from position: {1},{2} to position {3},{4}", obj.Id, obj.X, obj.Y, x, y));
-
-            //for printing purposes
-            int localX = obj.X;
-            int localY = obj.Y;
-
-            // try to move the object to the random position (x,y)
-            bool result = board.TryToMove(obj, x, y);
-            if (result)
-                producerConsumer.Produce(String.Format("Object number {0} moved from {1},{2} to {3},{4}", obj.Id, localX, localY, x, y));
-        }
-
-        public void Fight(IDynamicObject obj)
-        {
-            producerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", obj.Id));
-
-            // get all objects near the given object
-            var dynamicObjects = board.GetNearObjects(obj.X, obj.Y);
-
-            if (dynamicObjects.Count == 0)
-                return;
-
-            // fight a random object
-            int index = 0;
-            switch (randomOption)
-            {
-                case RandomOption.RealTime:
-                    index = MyRandom.Next(0, dynamicObjects.Count);
-                    break;
-                case RandomOption.Testing:
-                    index = rnd.Next(0, dynamicObjects.Count);
-                    break;
-            }
-            obj.Fight(dynamicObjects[index]);
-        }
 
         private void DynamicObjectAction(IDynamicObject obj)
         {
@@ -277,18 +190,18 @@ namespace GameLogicNameSpace
                     switch (obj.State)
                     {
                         case State.Alive:
-                            ActAliveObject(obj);
+                            obj.ActAliveObject();
                             break;
                         case State.Depressed:
-                            ActDepressedObject(obj);
+                            obj.ActDepressedObject();
                             break;
                         case State.Dead:
                             break;
                     }
                     //at the end of the action go to sleep 
-                    obj.CalculateSleep(info.ObjectSleepDaysLow, info.ObjectSleepDaysHigh);
+                    obj.CalculateSleep();
                     //check if we need to update the status of the object
-                    board.UpdateStatus(obj);
+                    obj.UpdateStatus();
                 }
                 // at the end of the day we inceremnt the number of finished tasks of the day.
                 Interlocked.Increment(ref finishedTasksOfTheDay);

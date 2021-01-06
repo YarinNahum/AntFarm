@@ -3,6 +3,7 @@ using System;
 using FakeItEasy;
 using ProducerConsumer;
 using DynamicObjects;
+using IDynamicObjects;
 
 namespace Unit_Tests
 {
@@ -44,6 +45,40 @@ namespace Unit_Tests
             //assert
             Assert.AreEqual(6, other.Strength);
             Assert.AreEqual(State.Depressed, ant.State);
+        }
+
+        [TestMethod]
+
+        public void Test_ActDepressed()
+        {
+            //initialize
+            /*IInfo info = A.Fake<IInfo>();
+            IBoard board = A.Fake<IBoard>();
+            IRandomTest rnd = A.Fake<IRandomTest>();
+
+            GameLogic gameLogic = new GameLogic();
+            gameLogic.GameLogicTest(info, board, rnd);
+
+            List<IDynamicObject> l = new List<IDynamicObject>();
+
+            int count = 3;
+            for (int i = 0; i < count; i++)
+            {
+                var obj = A.Fake<IDynamicObject>();
+                l.Add(obj);
+            }
+
+            var dynamicObject = A.Fake<IDynamicObject>();
+            A.CallTo(() => dynamicObject.X).Returns(1);
+            A.CallTo(() => dynamicObject.Y).Returns(1);
+            A.CallTo(() => board.GetNearObjects(1, 1)).ReturnsLazily(() => l);
+            A.CallTo(() => info.MaxObjectsPerArea).Returns(4);
+            A.CallTo(() => info.MinObjectsPerArea).Returns(2);
+
+            //act
+            gameLogic.ActDepressedObject(dynamicObject);
+            //assert
+            A.CallTo(() => dynamicObject.SetState(State.Alive)).MustHaveHappened();*/
         }
 
     }

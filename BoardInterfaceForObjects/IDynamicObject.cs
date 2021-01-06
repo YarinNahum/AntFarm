@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils;
 using StaticObjects;
+using BoardInterfaceForObjects;
 using ProducerConsumer;
 
-namespace DynamicObjects
+namespace IDynamicObjects
 {
     /// <summary>
     /// An abstract class for any dynamic object that can be on the game board.
@@ -15,10 +16,14 @@ namespace DynamicObjects
     /// </summary>
     public abstract class IDynamicObject
     {
+
+        protected IInfo info = Info.Instance;
+        public virtual IBoardFunctions BoardFunctions { get; set; }
+
         /// <summary>
         /// The id of the object.
         /// </summary>
-        public virtual int Id { get;protected set; }
+        public virtual int Id { get; protected set; }
 
         /// <summary>
         /// The current state of the object.
@@ -30,13 +35,18 @@ namespace DynamicObjects
         /// The current strength value of the object.
         /// If the strength is 0, the object will die.
         /// </summary>
-        public virtual int Strength { get;  set; }
+        public virtual int Strength { get; set; }
+
+        /// <summary>
+        /// The current agility value if the object
+        /// </summary>
+        public virtual int Agility { get; set; }
 
         /// <summary>
         /// The current age of the object.
         /// The age will grow by 1 each day that passes.
         /// </summary>
-        public virtual int Age { get;  set; }
+        public virtual int Age { get; set; }
 
         /// <summary>
         /// The current value of how many days the object will sleep.
@@ -96,14 +106,39 @@ namespace DynamicObjects
         public abstract void Fight(IDynamicObject other);
 
         /// <summary>
+        /// Try to fight another object
+        /// </summary>
+        public virtual void TryToFight()
+        {
+            ProducerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", Id));
+
+            // get all objects near the given object
+            var dynamicObjects = BoardFunctions.GetNearObjects(X, Y);
+
+            if (dynamicObjects.Count == 0)
+            {
+                ProducerConsumer.Produce(String.Format("Object number {0} found no one around him to fight",Id));
+                return;
+            }
+
+            // fight a random object
+            int index = 0;
+
+            index = MyRandom.Next(0, dynamicObjects.Count);
+
+
+            Fight(dynamicObjects[index]);
+        }
+
+        /// <summary>
         /// Calculate how much sleep to add to the SleepCount from low to high
         /// This function uses the <see cref="MyRandom"/> class for the randomizer
         /// </summary>
         /// <param name="low">The lower bound of the interval</param>
         /// <param name="high">The higher bound of the interval</param>
-        public virtual void CalculateSleep(int low, int high)
+        public virtual void CalculateSleep()
         {
-            SleepCount = low == high ? low : MyRandom.Next(low, high + 1);
+            SleepCount = info.ObjectSleepDaysLow == info.ObjectSleepDaysHigh ? info.ObjectSleepDaysLow : MyRandom.Next(info.ObjectSleepDaysLow, info.ObjectSleepDaysHigh + 1);
         }
 
         /// <summary>
@@ -121,11 +156,61 @@ namespace DynamicObjects
         /// <param name="obj">An instance of a Food class</param>
         public abstract void ActOnStaticObject(Food obj);
 
+        /// <summary>
+        /// Try to move the object on the board
+        /// See <see cref="IBoardFunctions"/>
+        /// <seealso cref="MyRandom"/>
+        /// </summary>
+        /// <param name="obj">The object trying to move</param>
+        public abstract void TryToMove();
+
+        /// <summary>
+        /// Decide how to act when depressed
+        /// See <see cref="State"/>
+        /// <seealso cref="Info.MinObjectsPerArea"/>
+        /// <seealso cref="Info.MaxObjectsPerArea"/>
+        /// </summary>
+        public abstract void ActDepressedObject();
+
+        /// <summary>
+        /// /// Decide how to act when alive
+        /// See <see cref="State"/>
+        /// </summary>
+        public abstract void ActAliveObject();
+
+        /// <summary>
+        /// update the status of the given object. It must catch the lock in the same tile as the object
+        /// in Read mode.
+        /// See <see cref="ReaderWriterLockSlim"/>
+        /// <seealso cref="Tile"/>
+        /// </summary>
+        /// <param name="obj">Update the given object</param>
+        public virtual void UpdateStatus()
+        {
+            var objectsNear = BoardFunctions.GetNearObjects(X, Y);
+
+            // count is the number of objects around the given object.
+            int count = objectsNear.Count;
+
+
+            /// if the count is not in the boundries given by the <see cref="Info"/> class,
+            /// the object's state will become <see cref="State.Depressed"/>.
+            if ((count < info.MinObjectsPerArea || count > info.MaxObjectsPerArea) && State == State.Alive)
+            {
+                ProducerConsumer.Produce(String.Format("Object number {0} became depressed!", Id));
+                SetState(State.Depressed);
+            }
+
+        }
+
+
     }
     /// <summary>
     /// All possible states of a IDynamicObject.
     /// </summary>
     public enum State { Alive, Depressed, Dead };
+
+    public enum DeBuff { Cocoon, UnAffected }
 
 }
 

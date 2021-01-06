@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Tiles;
 using Utils;
+using IDynamicObjects;
 using DynamicObjects;
 using StaticObjects;
 using ProducerConsumer;
@@ -27,6 +28,7 @@ namespace BoardNamespace
             this.rnd = rnd;
             randomOption = RandomOption.Testing;
             this.producerConsumer = producerConsumer;
+            aliveObjects = new Dictionary<int, IDynamicObject>();
             
         }
 
@@ -54,7 +56,7 @@ namespace BoardNamespace
                 if (tiles[x, y].DynamicObject == null)
                 {
                     int id = info.ID;
-                    IDynamicObject ant = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
+                    IDynamicObject ant = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this};
                     tiles[x, y].DynamicObject = ant;
                     count--;
                     aliveObjects.Add(id, ant);
@@ -64,10 +66,10 @@ namespace BoardNamespace
             return l;
         }
 
-        public void SetTileObject(IDynamicObject obj, int x , int y)
+        public void ClearDynamicObjectOnTile(int x , int y)
         {
             ITile t = tiles[x, y];
-            t.DynamicObject = obj;
+            t.DynamicObject = null;
         }
 
         public void GenetareFood()
@@ -92,45 +94,14 @@ namespace BoardNamespace
         }
 
 
-        public void UpdateStatus(IDynamicObject obj)
+        public bool TryToMove(int fromX,int fromY, int toX, int toY)
         {
-            // count is the number of objects around the given object.
-            int count = 0;
-            // loop around the given object position.
-            for (int i = Math.Max(0, obj.X - 1); i <= Math.Min(info.Length - 1, obj.X + 1); i++)
-                for (int j = Math.Max(0, obj.Y - 1); j <= Math.Min(info.Hight - 1, obj.Y + 1); j++)
-                {
-                    // get the lock of the tile and enter with read mode.
-                    tiles[i, j].Lock.EnterReadLock();
-                    try
-                    {
-                        if (tiles[i, j].DynamicObject != null && (obj.X != i || obj.Y != j))
-                            count++;
-                    }
-                    finally
-                    {
-                        tiles[i, j].Lock.ExitReadLock();
-                    }
-                }
-
-            /// if the count is not in the boundries given by the <see cref="Info"/> class,
-            /// the object's state will become <see cref="State.Depressed"/>.
-            if ((count < info.MinObjectsPerArea || count > info.MaxObjectsPerArea) && obj.State == State.Alive)
-            {
-                producerConsumer.Produce(String.Format("Object number {0} became depressed!", obj.Id));
-                obj.SetState(State.Depressed);
-            }
-        }
-
-
-        public bool TryToMove(IDynamicObject obj, int x, int y)
-        {
-            if (x >= info.Length || x < 0 || y >= info.Hight || y < 0)
+            if (toX >= info.Length || toX < 0 || toY >= info.Hight || toY < 0)
                 throw new ArgumentException("Trying to move outside of the board");
 
             // catch both the locks at (x,y) and the object position in upgradable mode.
-            ITile tileToMove = tiles[x, y];
-            ITile myTile = tiles[obj.X, obj.Y];
+            ITile tileToMove = tiles[toX, toY];
+            ITile myTile = tiles[fromX, fromY];
             myTile.Lock.EnterUpgradeableReadLock();
             tileToMove.Lock.EnterUpgradeableReadLock();
             try
@@ -144,11 +115,14 @@ namespace BoardNamespace
 
                     try
                     {
+                        if (myTile.DynamicObject == null)
+                            throw new ArgumentException("Trying to move an object from a tile that has no object");
                         // move the object to the position (x,y)
+                        IDynamicObject obj = myTile.DynamicObject;
                         tileToMove.DynamicObject = obj;
                         myTile.DynamicObject = null;
-                        obj.X = x;
-                        obj.Y = y;
+                        obj.X = toX;
+                        obj.Y = toY;
 
                         // if there is a static object at (x,y)
                         if (tileToMove.StaticObject != null)
@@ -226,7 +200,7 @@ namespace BoardNamespace
                         {
                             // creates a new and and return it.
                             int id = info.ID;
-                            IDynamicObject newAnt = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer };
+                            IDynamicObject newAnt = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this };
                             producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, newAnt.Id));
                             tile.DynamicObject = newAnt;
                             aliveObjects.Add(id, newAnt);

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DynamicObjects;
+using IDynamicObjects;
 using StaticObjects;
 
 namespace Tiles

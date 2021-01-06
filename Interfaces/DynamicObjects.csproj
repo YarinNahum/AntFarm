@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8B5A225E-D326-4B98-9E4C-24FCE482C898}</ProjectGuid>
+    <ProjectGuid>{D612BA38-ED0D-4B28-9266-2AA2463C6A21}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GameBoard</RootNamespace>
-    <AssemblyName>GameBoard</AssemblyName>
+    <RootNamespace>Interfaces</RootNamespace>
+    <AssemblyName>Interfaces</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -41,8 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board.cs" />
-    <Compile Include="IBoard.cs" />
+    <Compile Include="Classes\Ant.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -50,17 +49,9 @@
       <Project>{fb09edd7-4f80-4e19-8cc0-c44e96bc9c76}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Interfaces\DynamicObjects.csproj">
-      <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
-      <Name>DynamicObjects</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ProducerConsumer\ProducerConsumer.csproj">
       <Project>{64405c3f-cd38-42fd-aa97-f45352303f0b}</Project>
       <Name>ProducerConsumer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tile\Tiles.csproj">
-      <Project>{f6a6cff8-740c-4aab-bee2-03899dee9177}</Project>
-      <Name>Tiles</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{32b91565-d4f1-4199-8f74-d8685c857017}</Project>
