@@ -50,9 +50,9 @@
       <Project>{fb09edd7-4f80-4e19-8cc0-c44e96bc9c76}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Interfaces\DynamicObjects.csproj">
+    <ProjectReference Include="..\Interfaces\Ant.csproj">
       <Project>{d612ba38-ed0d-4b28-9266-2aa2463c6a21}</Project>
-      <Name>DynamicObjects</Name>
+      <Name>Ant</Name>
     </ProjectReference>
     <ProjectReference Include="..\ProducerConsumer\ProducerConsumer.csproj">
       <Project>{64405c3f-cd38-42fd-aa97-f45352303f0b}</Project>

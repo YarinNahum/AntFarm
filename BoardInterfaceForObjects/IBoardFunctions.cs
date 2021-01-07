@@ -17,15 +17,17 @@ namespace BoardInterfaceForObjects
 
 
         /// <summary>
-        /// Get all near objects with the given position as the center.
+        /// Get all near objects with the given position as the center,
+        /// with the level value represent the radius.
         /// Catches each near tile's lock in read mode.
         /// See <see cref="ReaderWriterLockSlim"/>
         /// <seealso cref="Tile"/>
         /// </summary>
         /// <param name="x">The x axis value of the position</param>
         /// <param name="y">The y axis value of the position</param>
+        /// <param name="level">The value of the radius</param>
         /// <returns>A list of all the objects near the given object argument</returns>
-        List<IDynamicObject> GetNearObjects(int x, int y);
+        List<IDynamicObject> GetNearObjects(int x, int y, int level);
 
 
         /// <summary>

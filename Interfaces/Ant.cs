@@ -14,22 +14,12 @@ namespace DynamicObjects
     {
 
         //For testing purposes
-        public Ant()
+        public Ant() : base()
         {
-            Id = 0;
-            State = State.Alive;
-            Age = 0;
-            Strength = 3;
-            Agility = 1;
-        }
-        public Ant(int id, int lowStrength, int highStrength)
-        {
-            State = State.Alive;
-            this.Id = id;
-            Age = 0;
-            SleepCount = 0;
-            Strength = lowStrength == highStrength? lowStrength : MyRandom.Next(lowStrength, highStrength + 1);
-            Agility = 1;
+            int lowStrength = info.ObjectStartStrengthLow;
+            int highStrength = info.ObjectStartStrengthHigh;
+            Strength = lowStrength == highStrength? lowStrength: MyRandom.Next(lowStrength, highStrength + 1);
+            Agility = 0;
         }
 
         public override void Fight(IDynamicObject other)
@@ -44,9 +34,10 @@ namespace DynamicObjects
                 ProducerConsumer.Produce(String.Format("Object number {0} won agains object number {1}",
                     winner.Id,loser.Id)); 
             }
+
             /// the winner of the fight is the object with more strength. if the strengths of objects are the same
             /// than there is no winner
-            if (Strength > other.Strength)
+            if (Strength > other.Strength || other.DeBuff == DeBuff.Cocoon)
                 act(this, other);
             else if (other.Strength > Strength)
                 act(other, this);
@@ -67,7 +58,7 @@ namespace DynamicObjects
                 y = MyRandom.Next(Math.Max(0, Y - 1), Math.Min(info.Hight, Y + 2));
             } while (x == X && y == Y);
 
-            ProducerConsumer.Produce(String.Format("Object number {0} wants to move from position: {1},{2} to position {3},{4}", Id, X, Y, x, y));
+            ProducerConsumer.Produce(String.Format("Object number {0} wants to move from position: ({1},{2}) to position ({3},{4})", Id, X, Y, x, y));
 
             //for printing purposes
             int localX = X;
@@ -76,11 +67,12 @@ namespace DynamicObjects
             // try to move the object to the random position (x,y)
             bool result = BoardFunctions.TryToMove(X,Y,x, y);
             if (result)
-                ProducerConsumer.Produce(String.Format("Object number {0} moved from {1},{2} to {3},{4}", Id, localX, localY, x, y));
+                ProducerConsumer.Produce(String.Format("Object number {0} moved from ({1},{2}) to ({3},{4})", Id, localX, localY, x, y));
         }
 
-        public override void ActAliveObject()
+        protected override void ActAliveObject()
         {
+            
             // decide what action to perform
             string action = DecideAction();
             if (action.Equals("Move"))
@@ -93,9 +85,9 @@ namespace DynamicObjects
             }
         }
 
-        public override void ActDepressedObject()
+        protected override void ActDepressedObject()
         {
-            var dynamicObjects = BoardFunctions.GetNearObjects(X, Y);
+            var dynamicObjects = BoardFunctions.GetNearObjects(X, Y,1);
 
             /// if the number of adjacent objects are in the range of [info.MinObjectsPerArea,info.MaxObjectsPerArea]
             /// than the given object will no longer be depressed.

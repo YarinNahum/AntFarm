@@ -16,8 +16,11 @@ namespace IDynamicObjects
     /// </summary>
     public abstract class IDynamicObject
     {
+        protected IInfo info;
 
-        protected IInfo info = Info.Instance;
+        protected int numberOfDaysCocooned = 0;
+
+        #region Propeties
         public virtual IBoardFunctions BoardFunctions { get; set; }
 
         /// <summary>
@@ -30,6 +33,8 @@ namespace IDynamicObjects
         /// See <see cref="State"/> for all the states
         /// </summary>
         public virtual State State { get; set; }
+
+        public virtual DeBuff DeBuff { get; set; }
 
         /// <summary>
         /// The current strength value of the object.
@@ -67,6 +72,19 @@ namespace IDynamicObjects
 
         public virtual IProducerConsumerMessages<string> ProducerConsumer { get; set; }
 
+        #endregion
+        /// <summary>
+        /// Base constructor for a dynamic object
+        /// </summary>
+        public IDynamicObject()
+        {
+            State = State.Alive;
+            DeBuff = DeBuff.UnAffected;
+            info = Info.Instance;
+            Id = info.ID;
+            Age = 0;
+            SleepCount = 0;
+        }
 
         /// <summary>
         /// Add to Strength value by amount
@@ -113,11 +131,11 @@ namespace IDynamicObjects
             ProducerConsumer.Produce(String.Format("Object number {0} is looking for a fight!", Id));
 
             // get all objects near the given object
-            var dynamicObjects = BoardFunctions.GetNearObjects(X, Y);
+            var dynamicObjects = BoardFunctions.GetNearObjects(X, Y, Agility);
 
             if (dynamicObjects.Count == 0)
             {
-                ProducerConsumer.Produce(String.Format("Object number {0} found no one around him to fight",Id));
+                ProducerConsumer.Produce(String.Format("Object number {0} found no one around him to fight", Id));
                 return;
             }
 
@@ -162,7 +180,25 @@ namespace IDynamicObjects
         /// <seealso cref="MyRandom"/>
         /// </summary>
         /// <param name="obj">The object trying to move</param>
-        public abstract void TryToMove();
+        public virtual void TryToMove()
+        {
+            int x, y;
+            do
+            {
+                x = MyRandom.Next(Math.Max(0, X - Agility), Math.Min(info.Length, X + 1 + Agility));
+                y = MyRandom.Next(Math.Max(0, Y - Agility), Math.Min(info.Hight, Y + 1 + Agility));
+            } while (x != X || y != Y);
+
+            int localX = X;
+            int localY = Y;
+
+            bool result = BoardFunctions.TryToMove(X, Y, x, y);
+            if (result)
+            {
+                ProducerConsumer.Produce(String.Format("Spider number {0} moved from ({1},{2}) to ({3},{4})", Id, localX, localY, x, y));
+            }
+
+        }
 
         /// <summary>
         /// Decide how to act when depressed
@@ -170,24 +206,59 @@ namespace IDynamicObjects
         /// <seealso cref="Info.MinObjectsPerArea"/>
         /// <seealso cref="Info.MaxObjectsPerArea"/>
         /// </summary>
-        public abstract void ActDepressedObject();
+        protected abstract void ActDepressedObject();
 
         /// <summary>
         /// /// Decide how to act when alive
         /// See <see cref="State"/>
         /// </summary>
-        public abstract void ActAliveObject();
+        protected abstract void ActAliveObject();
 
         /// <summary>
-        /// update the status of the given object. It must catch the lock in the same tile as the object
-        /// in Read mode.
-        /// See <see cref="ReaderWriterLockSlim"/>
-        /// <seealso cref="Tile"/>
+        /// Decide what action the object will do
         /// </summary>
-        /// <param name="obj">Update the given object</param>
-        public virtual void UpdateStatus()
+        public virtual void Action()
         {
-            var objectsNear = BoardFunctions.GetNearObjects(X, Y);
+            if (DeBuff == DeBuff.Cocoon)
+                return;
+            if (SleepCount == 0)
+            {
+                //depends on the state of the object dedice what action to do
+                switch (State)
+                {
+                    case State.Alive:
+                        ActAliveObject();
+                        break;
+                    case State.Depressed:
+                        ActDepressedObject();
+                        break;
+                    case State.Dead:
+                        break;
+                }
+                //check if we need to update the status of the object
+                UpdateStatus();
+            }
+        }
+
+        /// <summary>
+        /// update the status of the object.
+        /// in Read mode.
+        /// <see cref="IBoardFunctions.GetNearObjects(int, int)"/>
+        /// </summary>
+        private void UpdateStatus()
+        {
+            if (DeBuff == DeBuff.Cocoon)
+            {
+                if (numberOfDaysCocooned < 2)
+                    numberOfDaysCocooned++;
+                else
+                {
+                    numberOfDaysCocooned = 0;
+                    DeBuff = DeBuff.UnAffected;
+                }
+            }
+
+            var objectsNear = BoardFunctions.GetNearObjects(X, Y,1);
 
             // count is the number of objects around the given object.
             int count = objectsNear.Count;
@@ -210,7 +281,10 @@ namespace IDynamicObjects
     /// </summary>
     public enum State { Alive, Depressed, Dead };
 
-    public enum DeBuff { Cocoon, UnAffected }
+    /// <summary>
+    /// All possible debuff
+    /// </summary>
+    public enum DeBuff { UnAffected, Cocoon }
 
 }
 

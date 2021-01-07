@@ -110,7 +110,7 @@ namespace GameLogicNameSpace
             /// we return only the non-dead objects on the board.
             foreach (IDynamicObject obj in l)
             {
-                
+
                 obj.AddStrength(-info.ObjectStrengthDecay);
                 if (obj.Strength > 0)
                 {
@@ -183,26 +183,11 @@ namespace GameLogicNameSpace
             //As long as the object is alive
             while (obj.State != State.Dead)
             {
+                obj.Action();
+                //at the end of the action go to sleep 
+                obj.CalculateSleep();
+
                 // if the object is not sleeping
-                if (obj.SleepCount == 0)
-                {
-                    //depends on the state of the object dedice what action to do
-                    switch (obj.State)
-                    {
-                        case State.Alive:
-                            obj.ActAliveObject();
-                            break;
-                        case State.Depressed:
-                            obj.ActDepressedObject();
-                            break;
-                        case State.Dead:
-                            break;
-                    }
-                    //at the end of the action go to sleep 
-                    obj.CalculateSleep();
-                    //check if we need to update the status of the object
-                    obj.UpdateStatus();
-                }
                 // at the end of the day we inceremnt the number of finished tasks of the day.
                 Interlocked.Increment(ref finishedTasksOfTheDay);
 
@@ -219,8 +204,18 @@ namespace GameLogicNameSpace
         private void TryCreateObject()
         {
             // get a random position on the board
-            int x = MyRandom.Next(0, info.Length);
-            int y = MyRandom.Next(0, info.Hight);
+            int x, y;
+            switch (randomOption)
+            {
+                case RandomOption.RealTime:
+                    x = MyRandom.Next(0, info.Length);
+                    y = MyRandom.Next(0, info.Hight);
+                    break;
+                default:
+                    x = rnd.Next(0, info.Length);
+                    y = rnd.Next(0, info.Hight);
+                    break;
+            }
 
             //try to create an object at position (x,y)
             IDynamicObject obj = board.TryCreate(x, y);

@@ -55,11 +55,11 @@ namespace BoardNamespace
                 // create a IDynamicObject at (x,y) if there isn't one already.
                 if (tiles[x, y].DynamicObject == null)
                 {
-                    int id = info.ID;
-                    IDynamicObject ant = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this};
+
+                    IDynamicObject ant = new Ant() { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this};
                     tiles[x, y].DynamicObject = ant;
                     count--;
-                    aliveObjects.Add(id, ant);
+                    aliveObjects.Add(ant.Id, ant);
                     l.Add(ant);
                 }
             }
@@ -147,12 +147,12 @@ namespace BoardNamespace
             }
         }
 
-        public List<IDynamicObject> GetNearObjects(int x, int y)
+        public List<IDynamicObject> GetNearObjects(int x, int y, int level)
         {
             List<IDynamicObject> objects = new List<IDynamicObject>();
             // loop around position (x,y)
-            for (int i = Math.Max(0, x - 1); i <= Math.Min(info.Length - 1, x + 1); i++)
-                for (int j = Math.Max(0, y - 1); j <= Math.Min(info.Hight - 1, y + 1); j++)
+            for (int i = Math.Max(0, x - level); i <= Math.Min(info.Length - 1, x + level); i++)
+                for (int j = Math.Max(0, y - 1); j <= Math.Min(info.Hight - 1, y + level); j++)
                 {
                     if (i != x || j != y)
                     {
@@ -189,7 +189,7 @@ namespace BoardNamespace
                 if (tile.DynamicObject == null)
                 {
                     // if there isn't an object we get all the dynamic objects around it
-                    var ants = GetNearObjects(x, y);
+                    var ants = GetNearObjects(x, y,1);
 
                     // only if there isn't any objects around (x,y) we create a new dynamic object there.
                     if (ants.Count == 0)
@@ -199,11 +199,10 @@ namespace BoardNamespace
                         try
                         {
                             // creates a new and and return it.
-                            int id = info.ID;
-                            IDynamicObject newAnt = new Ant(id, info.ObjectStartStrengthLow, info.ObjectStartStrengthHigh) { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this };
+                            IDynamicObject newAnt = new Ant() { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this };
                             producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, newAnt.Id));
                             tile.DynamicObject = newAnt;
-                            aliveObjects.Add(id, newAnt);
+                            aliveObjects.Add(newAnt.Id, newAnt);
                             return newAnt;
                         }
                         finally { tile.Lock.ExitWriteLock(); }
