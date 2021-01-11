@@ -15,8 +15,8 @@ namespace SpiderObject
         public Spider() : base()
         {
             agilityProgress = 0;
-            Strength = 1;
-            Agility = 1;
+            Strength = 3;
+
         }
 
         public override string DecideAction()
@@ -87,6 +87,7 @@ namespace SpiderObject
                 Strength += 2;
                 Agility++;
                 spider.SetState(State.Dead);
+                BoardFunctions.ClearDynamicObjectOnTile(spider.X, spider.Y);
                 ProducerConsumer.Produce(String.Format("Spider number {0} ate another spider with id {1}", Id, spider.Id));
             }
             else if (Agility > spider.Agility)

@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using Tiles;
 using Utils;
 using IDynamicObjects;
-using DynamicObjects;
 using StaticObjects;
+using DynamicObjects;
 using ProducerConsumer;
+using System.Configuration;
+using SpiderObject;
+using System.IO;
+using System.Reflection;
 
 namespace BoardNamespace
 {
     public class Board : IBoard
     {
+        private static readonly object locker = new object();
         private ITile[,] tiles;
         private IInfo info;
         private IRandomTest rnd;
         private RandomOption randomOption = RandomOption.RealTime;
         private IProducerConsumerMessages<string> producerConsumer;
         private Dictionary<int, IDynamicObject> aliveObjects;
+        private List<Type> types; 
 
         //for testing purposes
         public Board() { }
@@ -29,12 +35,15 @@ namespace BoardNamespace
             randomOption = RandomOption.Testing;
             this.producerConsumer = producerConsumer;
             aliveObjects = new Dictionary<int, IDynamicObject>();
-            
+            ReadFolder();
         }
 
 
         public Board(int length, int hight, IProducerConsumerMessages<string> producerConsumer)
         {
+
+            ReadFolder();
+            
             info = Info.Instance;
             this.producerConsumer = producerConsumer;
             tiles = new Tile[length, hight];
@@ -55,12 +64,11 @@ namespace BoardNamespace
                 // create a IDynamicObject at (x,y) if there isn't one already.
                 if (tiles[x, y].DynamicObject == null)
                 {
-
-                    IDynamicObject ant = new Ant() { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this};
-                    tiles[x, y].DynamicObject = ant;
+                    IDynamicObject obj = GetNewObject(x,y);
+                    tiles[x, y].DynamicObject = obj;
                     count--;
-                    aliveObjects.Add(ant.Id, ant);
-                    l.Add(ant);
+                    aliveObjects.Add(obj.Id, obj);
+                    l.Add(obj);
                 }
             }
             return l;
@@ -102,8 +110,11 @@ namespace BoardNamespace
             // catch both the locks at (x,y) and the object position in upgradable mode.
             ITile tileToMove = tiles[toX, toY];
             ITile myTile = tiles[fromX, fromY];
-            myTile.Lock.EnterUpgradeableReadLock();
-            tileToMove.Lock.EnterUpgradeableReadLock();
+            lock (locker)
+            {
+                myTile.Lock.EnterUpgradeableReadLock();
+                tileToMove.Lock.EnterUpgradeableReadLock();
+            }
             try
             {
                 // if the tile at (x,y) is empty
@@ -199,11 +210,11 @@ namespace BoardNamespace
                         try
                         {
                             // creates a new and and return it.
-                            IDynamicObject newAnt = new Ant() { X = x, Y = y, ProducerConsumer = producerConsumer, BoardFunctions = this };
-                            producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, newAnt.Id));
-                            tile.DynamicObject = newAnt;
-                            aliveObjects.Add(newAnt.Id, newAnt);
-                            return newAnt;
+                            IDynamicObject obj = GetNewObject(x, y);
+                            producerConsumer.Produce(String.Format("Id: {2} was created at position {0},{1}", x, y, obj.Id));
+                            tile.DynamicObject = obj;
+                            aliveObjects.Add(obj.Id, obj);
+                            return obj;
                         }
                         finally { tile.Lock.ExitWriteLock(); }
                     }
@@ -220,7 +231,6 @@ namespace BoardNamespace
 
         public List<IDynamicObject> GetAlive()
         {
-
             return new List<IDynamicObject>(aliveObjects.Values);
         }
 
@@ -250,6 +260,45 @@ namespace BoardNamespace
                     break;
             }
             return new Tuple<int, int>(x, y);
+        }
+
+        public void ReadFolder()
+        {
+            types = new List<Type>
+            {
+                typeof(Ant)
+            };
+            var m = ConfigurationManager.AppSettings;
+            string path = m.Get("ExtraObjectsFolderPath");
+            if (path == null)
+                return;
+            string[] listOfDLL = Directory.GetFiles(@path,"*.dll");
+            foreach (string dll in listOfDLL)
+            {
+                var assm = Assembly.LoadFile(dll);
+                foreach (var t in assm.GetTypes())
+                {
+                    if(t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(IDynamicObject)))
+                    {
+                        types.Add(t);
+                    }
+                }
+            }
+
+        }
+
+        private IDynamicObject GetNewObject(int x, int y)
+        {
+            int index = MyRandom.Next(0, types.Count);
+            Type t = types[index];
+            var obj = (IDynamicObject)Activator.CreateInstance(t);
+            {
+                obj.X = x;
+                obj.Y = y;
+                obj.ProducerConsumer = producerConsumer;
+                obj.BoardFunctions = this;
+            }
+            return obj;
         }
     }
 

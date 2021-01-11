@@ -1,9 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Utils;
 using FakeItEasy;
 using ProducerConsumer;
 using DynamicObjects;
+using BoardInterfaceForObjects;
 using IDynamicObjects;
+using System.Collections.Generic;
 
 namespace Unit_Tests
 {
@@ -14,7 +17,8 @@ namespace Unit_Tests
         public void Test_Fight_With_Other_Should_Win()
         {
             //initialize
-            var ant = new Ant();
+            var ant = new Ant() { Strength = 3 };
+            
             var other = A.Fake<IDynamicObject>();
             var producerConsumer = A.Fake<IProducerConsumerMessages<string>>();
             ant.ProducerConsumer = producerConsumer;
@@ -32,18 +36,20 @@ namespace Unit_Tests
         public void Test_Fight_With_Other_Should_Lose()
         {
             //initialize
-            var ant = new Ant();
+            IInfo info = A.Fake<IInfo>();
+            IRandomTest rnd = A.Fake<IRandomTest>();
+
+            var ant = new Ant(info,rnd);
+
             var producerConsumer = A.Fake<IProducerConsumerMessages<string>>();
             ant.ProducerConsumer = producerConsumer;
             var other = A.Fake<IDynamicObject>();
-            int strength = 4;
-            A.CallTo(() => other.Strength).ReturnsLazily(()=> strength);
+            A.CallTo(() => other.Strength).ReturnsLazily(()=> 4);
             A.CallToSet(() => other.Strength).To(6);
             //act
             ant.Fight(other);
-            strength = 6;
             //assert
-            Assert.AreEqual(6, other.Strength);
+            A.CallTo(() => other.AddStrength(2)).MustHaveHappened();
             Assert.AreEqual(State.Depressed, ant.State);
         }
 
@@ -52,33 +58,54 @@ namespace Unit_Tests
         public void Test_ActDepressed()
         {
             //initialize
-            /*IInfo info = A.Fake<IInfo>();
-            IBoard board = A.Fake<IBoard>();
+            IBoardFunctions board = A.Fake<IBoardFunctions>();
+            IInfo info = A.Fake<IInfo>();
+            IProducerConsumerMessages<string> pc = A.Fake<IProducerConsumerMessages<string>>();
             IRandomTest rnd = A.Fake<IRandomTest>();
-
-            GameLogic gameLogic = new GameLogic();
-            gameLogic.GameLogicTest(info, board, rnd);
+            IDynamicObject ant = new Ant(info,rnd) { BoardFunctions = board, X = 1, Y = 1,ProducerConsumer = pc};
 
             List<IDynamicObject> l = new List<IDynamicObject>();
-
-            int count = 3;
-            for (int i = 0; i < count; i++)
+            var positions = new List<(int, int)> { (0, 0), (1, 0), (2, 1)};
+            foreach (var p in positions)
             {
                 var obj = A.Fake<IDynamicObject>();
+                A.CallTo(() => obj.X).ReturnsLazily(() => p.Item1);
+                A.CallTo(() => obj.Y).ReturnsLazily(() => p.Item2);
+                A.CallTo(() => obj.State).Returns(State.Alive);
                 l.Add(obj);
             }
 
             var dynamicObject = A.Fake<IDynamicObject>();
-            A.CallTo(() => dynamicObject.X).Returns(1);
-            A.CallTo(() => dynamicObject.Y).Returns(1);
-            A.CallTo(() => board.GetNearObjects(1, 1)).ReturnsLazily(() => l);
-            A.CallTo(() => info.MaxObjectsPerArea).Returns(4);
-            A.CallTo(() => info.MinObjectsPerArea).Returns(2);
+
+            A.CallTo(() => board.GetNearObjects(ant.X, ant.Y, 1)).Returns(l);
+            A.CallTo(() => info.MaxObjectsPerArea).Returns(3);
+            A.CallTo(() => info.MinObjectsPerArea).Returns(1);
 
             //act
-            gameLogic.ActDepressedObject(dynamicObject);
+            ant.SetState(State.Depressed);
+            ant.Action();
+
             //assert
-            A.CallTo(() => dynamicObject.SetState(State.Alive)).MustHaveHappened();*/
+            Assert.AreEqual(State.Alive, ant.State);
+        }
+
+        [TestMethod]
+
+        public void Test_TryToMove()
+        {
+            IInfo info = A.Fake<IInfo>();
+            IBoardFunctions board = A.Fake<IBoardFunctions>();
+            IRandomTest rnd = A.Fake<IRandomTest>();
+
+            IDynamicObject ant = new Ant(info, rnd) { X = 0, Y = 0,Agility=1 , BoardFunctions = board};
+
+            A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(1);
+
+            //gameLogic.ActAliveObject(dynamicObject);
+
+            ant.TryToMove();
+            A.CallTo(() => board.TryToMove(0, 0, 1, 1)).MustHaveHappened();
+
         }
 
     }

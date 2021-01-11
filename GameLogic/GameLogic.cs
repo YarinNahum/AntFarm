@@ -26,6 +26,8 @@ namespace GameLogicNameSpace
         // an AutoResetEvent for the main thread of the program
         private readonly AutoResetEvent mainThreadARE;
 
+        private readonly AutoResetEvent creatorMainAutoResetEvent;
+
         private readonly Stopwatch clock;
 
         //an AutoResetEvent for the task that creates additional dynamic objects mid-run
@@ -46,6 +48,7 @@ namespace GameLogicNameSpace
             clock = new Stopwatch();
             ares = new ConcurrentDictionary<int, AutoResetEvent>();
             mainThreadARE = new AutoResetEvent(false);
+            creatorMainAutoResetEvent = new AutoResetEvent(false);
             creatorTaskARE = new AutoResetEvent(false);
             producerConsumer = new ProducerConsumerMessages();
             board = new Board(info.Length, info.Hight, producerConsumer);
@@ -83,6 +86,7 @@ namespace GameLogicNameSpace
                 {
                     while (clock.ElapsedMilliseconds < info.TimePerDay)
                         TryCreateObject();
+                    creatorMainAutoResetEvent.Set();
                     creatorTaskARE.WaitOne();
                 }
             });
@@ -112,7 +116,7 @@ namespace GameLogicNameSpace
             {
 
                 obj.AddStrength(-info.ObjectStrengthDecay);
-                if (obj.Strength > 0)
+                if (obj.State != State.Dead && obj.Strength > 0)
                 {
                     obj.Age++;
                     alive.Add(obj);
@@ -142,24 +146,27 @@ namespace GameLogicNameSpace
             // start the clock for the day
             clock.Start();
 
-            long numberOfAnts = ares.Count;
-
-            // call Set() for the AutoResetEvent that controls the task that creates new dynamic objects.
-            creatorTaskARE.Set();
-
             foreach (AutoResetEvent are in ares.Values)
             // call Set() for each AutoResetEvent in the dictinory. 
             {
                 are.Set();
             }
+            
+            // call Set() for the AutoResetEvent that controls the task that creates new dynamic objects.
+            creatorTaskARE.Set();
 
+
+            creatorMainAutoResetEvent.WaitOne();
+
+            long numberOfObjects = GetNumberOfAliveObjects();
+            
             /// this while acts as a barrier. the main thread will pass this barrier only when all 
             /// the dynamic object's tasks will finish for the given day. 
 
-            while (Interlocked.Read(ref finishedTasksOfTheDay) < Interlocked.Read(ref numberOfAnts))
+            while (Interlocked.Read(ref finishedTasksOfTheDay) <  numberOfObjects)
             {
                 mainThreadARE.WaitOne();
-                numberOfAnts = GetNumberOfAliveObjects();
+                numberOfObjects = GetNumberOfAliveObjects();
             }
             // reset the clock
             clock.Reset();
@@ -198,6 +205,8 @@ namespace GameLogicNameSpace
                 are.WaitOne();
             }
             // after the object died we remove the key-value pair associated with it
+            Interlocked.Increment(ref finishedTasksOfTheDay);
+            mainThreadARE.Set();
             ares.TryRemove(obj.Id, out _);
         }
 
@@ -224,9 +233,9 @@ namespace GameLogicNameSpace
                 /// if an object was created, add a new enrty in the dictinory and create 
                 /// a new task for the dynamic object
                 AutoResetEvent are = new AutoResetEvent(false);
-                are.Set();
                 ares.TryAdd(obj.Id, are);
                 Task.Factory.StartNew(() => DynamicObjectAction(obj), TaskCreationOptions.LongRunning);
+                are.Set();
             }
         }
 

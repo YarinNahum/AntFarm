@@ -19,7 +19,12 @@ namespace DynamicObjects
             int lowStrength = info.ObjectStartStrengthLow;
             int highStrength = info.ObjectStartStrengthHigh;
             Strength = lowStrength == highStrength? lowStrength: MyRandom.Next(lowStrength, highStrength + 1);
-            Agility = 0;
+        }
+
+        public Ant(IInfo info,IRandomTest rnd) : base()
+        {
+            this.rnd = rnd;
+            this.info = info; 
         }
 
         public override void Fight(IDynamicObject other)
@@ -47,27 +52,6 @@ namespace DynamicObjects
         {
             ProducerConsumer.Produce(String.Format("Ant number {0} ate food!", Id));
             Strength += 2;
-        }
-
-        public override void TryToMove()
-        {
-            int x , y;
-            do
-            {
-                x = MyRandom.Next(Math.Max(0, X - 1), Math.Min(info.Length, X + 2));
-                y = MyRandom.Next(Math.Max(0, Y - 1), Math.Min(info.Hight, Y + 2));
-            } while (x == X && y == Y);
-
-            ProducerConsumer.Produce(String.Format("Object number {0} wants to move from position: ({1},{2}) to position ({3},{4})", Id, X, Y, x, y));
-
-            //for printing purposes
-            int localX = X;
-            int localY = Y;
-
-            // try to move the object to the random position (x,y)
-            bool result = BoardFunctions.TryToMove(X,Y,x, y);
-            if (result)
-                ProducerConsumer.Produce(String.Format("Object number {0} moved from ({1},{2}) to ({3},{4})", Id, localX, localY, x, y));
         }
 
         protected override void ActAliveObject()

@@ -17,6 +17,7 @@ namespace IDynamicObjects
     public abstract class IDynamicObject
     {
         protected IInfo info;
+        protected IRandomTest rnd;
 
         protected int numberOfDaysCocooned = 0;
 
@@ -78,6 +79,7 @@ namespace IDynamicObjects
         /// </summary>
         public IDynamicObject()
         {
+            Agility = 1;
             State = State.Alive;
             DeBuff = DeBuff.UnAffected;
             info = Info.Instance;
@@ -140,10 +142,7 @@ namespace IDynamicObjects
             }
 
             // fight a random object
-            int index = 0;
-
-            index = MyRandom.Next(0, dynamicObjects.Count);
-
+            int index = MyRandom.Next(0, dynamicObjects.Count);
 
             Fight(dynamicObjects[index]);
         }
@@ -185,9 +184,17 @@ namespace IDynamicObjects
             int x, y;
             do
             {
-                x = MyRandom.Next(Math.Max(0, X - Agility), Math.Min(info.Length, X + 1 + Agility));
-                y = MyRandom.Next(Math.Max(0, Y - Agility), Math.Min(info.Hight, Y + 1 + Agility));
-            } while (x != X || y != Y);
+                if (rnd == null)
+                {
+                    x = MyRandom.Next(Math.Max(0, X - Agility), Math.Min(info.Length, X + 1 + Agility));
+                    y = MyRandom.Next(Math.Max(0, Y - Agility), Math.Min(info.Hight, Y + 1 + Agility));
+                }
+                else
+                {
+                    x = rnd.Next(Math.Max(0, X - Agility), Math.Min(info.Hight, X + 1 + Agility));
+                    y = rnd.Next(Math.Max(0, Y - Agility), Math.Min(info.Hight, Y + 1 + Agility));
+                }
+            } while (x == X && y == Y);
 
             int localX = X;
             int localY = Y;
@@ -195,7 +202,7 @@ namespace IDynamicObjects
             bool result = BoardFunctions.TryToMove(X, Y, x, y);
             if (result)
             {
-                ProducerConsumer.Produce(String.Format("Spider number {0} moved from ({1},{2}) to ({3},{4})", Id, localX, localY, x, y));
+                ProducerConsumer.Produce(String.Format("object number {0} moved from ({1},{2}) to ({3},{4})", Id, localX, localY, x, y));
             }
 
         }

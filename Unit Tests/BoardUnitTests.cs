@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 using BoardNamespace;
 using Utils;
 using Tiles;
@@ -164,13 +165,13 @@ namespace Unit_Tests
             board.TestBoard(tiles, info, rnd, producerConsumer);
 
             //act
-            Thread thr1 = new Thread(() => { tiles[2, 1].Lock.EnterWriteLock(); Console.WriteLine("enter lock"); autoResetEvent.Set();  Thread.Sleep(100); tiles[2, 1].Lock.ExitWriteLock(); Console.WriteLine("exit lock"); });
+            Thread thr1 = new Thread(() => { tiles[2, 1].Lock.EnterWriteLock(); autoResetEvent.Set();  Thread.Sleep(100); tiles[2, 1].Lock.ExitWriteLock();});
             thr1.Start();
 
             autoResetEvent.WaitOne();
-            Console.WriteLine("called funct");
+            
 
-            List<IDynamicObject> l = board.GetNearObjects(obj.X,obj.Y);
+            List<IDynamicObject> l = board.GetNearObjects(obj.X,obj.Y,1);
             
             //assert
             Assert.AreEqual(3, l.Count);
@@ -215,6 +216,8 @@ namespace Unit_Tests
 
             A.CallTo(() => info.Length).Returns(length);
             A.CallTo(() => info.Hight).Returns(hight);
+
+            
 
             IBoard board = new Board();
             board.TestBoard(tiles, info, rnd, producerConsumer);

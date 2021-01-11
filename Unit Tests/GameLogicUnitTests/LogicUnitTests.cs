@@ -6,6 +6,7 @@ using IDynamicObjects;
 using Tiles;
 using Utils;
 using BoardNamespace;
+using ProducerConsumer;
 
 
 namespace GameLogicUnitTests
@@ -76,100 +77,6 @@ namespace GameLogicUnitTests
 
         [TestMethod]
 
-        public void Test_ActDepressed()
-        {
-            //initialize
-            IInfo info = A.Fake<IInfo>();
-            IBoard board = A.Fake<IBoard>();
-            IRandomTest rnd = A.Fake<IRandomTest>();
-
-            GameLogic gameLogic = new GameLogic();
-            gameLogic.GameLogicTest(info, board, rnd);
-
-            List<IDynamicObject> l = new List<IDynamicObject>();
-
-            int count = 3;
-            for (int i = 0; i < count; i++)
-            {
-                var obj = A.Fake<IDynamicObject>();
-                l.Add(obj);
-            }
-
-            var dynamicObject = A.Fake<IDynamicObject>();
-            A.CallTo(() => dynamicObject.X).Returns(1);
-            A.CallTo(() => dynamicObject.Y).Returns(1);
-            A.CallTo(() => board.GetNearObjects(1, 1)).ReturnsLazily(() => l);
-            A.CallTo(() => info.MaxObjectsPerArea).Returns(4);
-            A.CallTo(() => info.MinObjectsPerArea).Returns(2);
-
-            //act
-            //gameLogic.ActDepressedObject(dynamicObject);
-            //assert
-            A.CallTo(() => dynamicObject.SetState(State.Alive)).MustHaveHappened();
-        }
-
-        [TestMethod]
-
-        public void Test_ActAlive_Move()
-        {
-            IInfo info = A.Fake<IInfo>();
-            IBoard board = A.Fake<IBoard>();
-            IRandomTest rnd = A.Fake<IRandomTest>();
-
-            GameLogic gameLogic = new GameLogic();
-            gameLogic.GameLogicTest(info, board, rnd);
-
-
-            var dynamicObject = A.Fake<IDynamicObject>();
-
-            A.CallTo(() => dynamicObject.DecideAction()).Returns("Move");
-            A.CallTo(() => dynamicObject.X).Returns(1);
-            A.CallTo(() => dynamicObject.Y).Returns(1);
-            A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(0);
-
-            //gameLogic.ActAliveObject(dynamicObject);
-
-            A.CallTo(() => board.TryToMove(dynamicObject.X, dynamicObject.Y, 0, 0)).MustHaveHappened();
-
-        }
-
-        [TestMethod]
-
-        public void Test_ActAlive_Fight()
-        {
-            IInfo info = A.Fake<IInfo>();
-            IBoard board = A.Fake<IBoard>();
-            IRandomTest rnd = A.Fake<IRandomTest>();
-
-            GameLogic gameLogic = new GameLogic();
-            gameLogic.GameLogicTest(info, board, rnd);
-
-            List<IDynamicObject> l = new List<IDynamicObject>();
-
-            int count = 3;
-            for (int i = 0; i < count; i++)
-            {
-                var obj = A.Fake<IDynamicObject>();
-                l.Add(obj);
-            }
-            
-
-            var dynamicObject = A.Fake<IDynamicObject>();
-            A.CallTo(() => board.GetNearObjects(1, 1)).ReturnsLazily(() => l);
-
-            A.CallTo(() => dynamicObject.DecideAction()).Returns("Fight");
-            A.CallTo(() => dynamicObject.X).Returns(1);
-            A.CallTo(() => dynamicObject.Y).Returns(1);
-            A.CallTo(() => rnd.Next(A<int>.Ignored, A<int>.Ignored)).Returns(0);
-
-            //gameLogic.ActAliveObject(dynamicObject);
-
-            A.CallTo(() => dynamicObject.Fight(l[0])).MustHaveHappened();
-        }
-
-
-        [TestMethod]
-
         public void Test_UpdateStatusAll()
         {
             IInfo info = A.Fake<IInfo>();
@@ -220,6 +127,23 @@ namespace GameLogicUnitTests
             gameLogic.GameLogicTest(info, board, rnd);
             gameLogic.UpdateAlive();
             A.CallTo(() => obj.SetState(State.Dead)).MustHaveHappened();
+        }
+
+
+        [TestMethod]
+
+        public void Test_GenerateFood()
+        {
+            IInfo info = A.Fake<IInfo>();
+            IBoard board = A.Fake<IBoard>();
+            IRandomTest rnd = A.Fake<IRandomTest>();
+
+            GameLogic gameLogic = new GameLogic();
+            gameLogic.GameLogicTest(info, board, rnd);
+
+            gameLogic.GenerateFood();
+
+            A.CallTo(() => board.GenetareFood()).MustHaveHappenedOnceExactly();
         }
 
     }

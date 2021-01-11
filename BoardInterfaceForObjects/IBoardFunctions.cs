@@ -42,5 +42,12 @@ namespace BoardInterfaceForObjects
         /// <returns></returns>
         bool TryToMove(int fromX, int fromY, int toX, int toY);
 
+        /// <summary>
+        /// Clear the Dynamic object at tile (x,y)
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        void ClearDynamicObjectOnTile(int x, int y);
+
     }
 }
